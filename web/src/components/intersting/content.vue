@@ -78,7 +78,7 @@ export default {
   methods: {
     guanzhuList() {
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/follow/list";
+      var url = "http://localhost:8081/follow/list";
       //var categoryId = this.id;
 
       _self.$axios
@@ -103,7 +103,7 @@ export default {
       this.display = !this.display;
        //console.log(userId);
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/add/follow";
+      var url = "http://localhost:8081/add/follow";
       //var categoryId = this.id;
 
       _self.$axios
@@ -127,7 +127,7 @@ export default {
       this.display = !this.display;
        //console.log(userId);
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/cancel/follow";
+      var url = "http://localhost:8081/cancel/follow";
       //var categoryId = this.id;
 
       _self.$axios
@@ -149,7 +149,7 @@ export default {
     },
     getData() {
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/category/";
+      var url = "http://localhost:8081/category/";
       var categoryId = this.id;
       // console.log(categoryId, "ipppppppppppp");
       _self.$axios
@@ -241,7 +241,7 @@ export default {
     }
   }
 }
-/deep/.el-button {
+::v-deep .el-button {
   display: inline-block;
   line-height: 1;
   white-space: nowrap;

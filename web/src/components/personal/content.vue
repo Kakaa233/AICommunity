@@ -70,7 +70,7 @@
           <el-form-item label="图像" prop="pic" class="changeImg">
             <el-upload
               class="avatar-uploader"
-              action="http://38617112yi.zicp.vip/upload/images"
+              action="http://localhost:8081/upload/images"
               :show-file-list="false"
               :on-success="handleAvatarSuccess"
               :before-upload="beforeAvatarUpload"
@@ -160,7 +160,7 @@ export default {
   methods: {
     newLikes() {
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/notice/list";
+      var url = "http://localhost:8081/notice/list";
       _self.$axios
         .get(url)
         .then((res) => {
@@ -183,7 +183,7 @@ export default {
     getUserInfo() {
 
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/userInfo";
+      var url = "http://localhost:8081/userInfo";
       _self.$axios
         .get(url)
         .then((res) => {
@@ -248,7 +248,7 @@ export default {
       // console.log(formData.get(0));
       // that.$axios
       //   .post(
-      //     'http://38617112yi.zicp.vip/upload/images', //请求后端的url
+      //     'http://localhost:8081/upload/images', //请求后端的url
       //     formData,
       //     config
       //   )
@@ -277,7 +277,7 @@ export default {
           userId: that.userObj.userId,
           avatar: that.img1,
         }
-        let url = 'http://38617112yi.zicp.vip/update/userInfo'
+        let url = 'http://localhost:8081/update/userInfo'
         that.$axios
           .post(url ,user, {
             headers: { "Content-Type": "application/json;charset=utf-8" ,
@@ -415,7 +415,7 @@ el-date-editor,
   transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
   width: 100%;
 }
-/deep/.el-form-item--small.el-form-item[data-v-087e46ba] {
+::v-deep .el-form-item--small.el-form-item[data-v-087e46ba] {
   margin-bottom: 17px !important;
 }
 </style>

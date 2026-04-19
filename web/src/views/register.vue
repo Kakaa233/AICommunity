@@ -13,11 +13,11 @@
               label-width="100px"
               class="demo-ruleForm"
             >
-              <el-form-item label="手机号" prop="phoneNumber">
+              <el-form-item label="账号名" prop="userId">
                 <el-input
-                  v-model="registerInfo.phoneNumber"
+                  v-model="registerInfo.userId"
                   autocomplete="off"
-                  placeholder="请输入手机号"
+                  placeholder="请输入账号名"
                 ></el-input>
               </el-form-item>
               <el-form-item label="验证码" prop="checkPass">
@@ -62,13 +62,13 @@ export default {
   data() {
     return {
       registerInfo: {
-        phoneNumber: "",
+        userId: "",
         passWord: "",
         checkPass: "",
       },
       rules: {
-        phoneNumber: [
-          { required: true, message: "请输入手机号", trigger: "blur" },
+        userId: [
+          { required: true, message: "请输入账号名", trigger: "blur" },
           {
             validator: function (rule, value, callback) {
               var MobileRegex = /^1[3|4|5|7|8][0-9]{9}$/;
@@ -114,7 +114,7 @@ export default {
   methods: {
     getCheckPass() {
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/register/sendSMSCode";
+      var url = "http://localhost:8081/register/sendSMSCode";
       var userId = _self.registerInfo.phoneNumber;
       _self.$axios
         .get(url, {
@@ -136,16 +136,15 @@ export default {
     },
     submitForm(formName) {
       const _self = this;
-      const userId = _self.registerInfo.phoneNumber;
+      const userId = _self.registerInfo.userId;
       const password = _self.registerInfo.passWord;
-      const code = _self.registerInfo.checkPass;
-      const url = "http://38617112yi.zicp.vip/register/verifyRegisterInfo";
+      const url = "http://localhost:8081/register/verifyRegisterInfo";
       this.$refs[formName].validate((valid) => {
         if (valid) {
           _self.$axios
-            .get(url, {
+            .post(url, {
               //将对象 序列化成URL的形式，以&进行拼接
-              params: { userId: userId, password: password, code: code },
+              params: { userId: userId, password: password },
             })
             .then((res) => {
               console.log(res);

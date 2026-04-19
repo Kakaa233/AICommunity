@@ -95,7 +95,7 @@ export default {
   background: #fff;
   border-radius: 4px;
 }
-/deep/.el-menu {
+::v-deep .el-menu {
   border-right: 0 !important;
   list-style: none;
   position: relative;

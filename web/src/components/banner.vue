@@ -193,7 +193,7 @@ export default {
       const inputSearch = this.inputSearch;
       var _self = this;
       
-      var url = "http://38617112yi.zicp.vip/article/search";
+      var url = "http://localhost:8081/article/search";
 
       _self.$axios
         .get(url, { params: { keyword: inputSearch } })
@@ -315,13 +315,13 @@ export default {
   height: 80px;
   line-height: 100px;
 }
-/deep/.el-input {
+::v-deep .el-input {
   position: relative;
   font-size: 14px;
   display: inline-block;
   width: 70% !important;
 }
-/deep/.el-input__inner {
+::v-deep .el-input__inner {
   -webkit-appearance: none;
   background-color: #fff;
   background-image: none;
@@ -339,12 +339,12 @@ export default {
   width: 100%;
   margin-top: 30px !important;
 }
-/deep/.el-input__prefix {
+::v-deep .el-input__prefix {
   left: 5px;
   top: 16px;
   transition: all 0.3s;
 }
-/deep/.el-col-3 {
+::v-deep .el-col-3 {
   width: 12.5%;
   margin-top: 31px !important;
 }

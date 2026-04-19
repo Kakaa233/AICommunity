@@ -119,7 +119,7 @@ export default {
     }
   }
 }
-/deep/.el-menu-item {
+::v-deep .el-menu-item {
   font-size: 14px;
   color: #303133;
   padding: 0 207px !important;

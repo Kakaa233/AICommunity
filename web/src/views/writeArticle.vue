@@ -219,7 +219,7 @@ export default {
     mode() {
       var reg = /<\/?.+?\/?>/g;
         // console.log(this.content.replace(reg, ""));
-        var url = "http://38617112yi.zicp.vip/article/edit";
+        var url = "http://localhost:8081/article/edit";
         // var url = "/insert";
         var _self = this;
         let articleTitle = this.input;
@@ -265,7 +265,7 @@ export default {
       if (this.input && this.content) {
         var reg = /<\/?.+?\/?>/g;
         // console.log(this.content.replace(reg, ""));
-        var url = "http://38617112yi.zicp.vip/article/insert";
+        var url = "http://localhost:8081/article/insert";
         // var url = "/insert";
         var _self = this;
         let articleTitle = this.input;
@@ -331,7 +331,7 @@ export default {
     color: rgb(63, 61, 61);
   }
 }
-/deep/.el-input__inner {
+::v-deep .el-input__inner {
   -webkit-appearance: none;
   background-color: #fff;
   background-image: none;
@@ -349,17 +349,17 @@ export default {
   width: 100%;
   // border-bottom: 1px solid #ebeef5;
 }
-/deep/.el-card {
+::v-deep .el-card {
   // border: 0 !important;
   border: 1px solid #ebeef5;
   background-color: #fff;
   color: #303133;
   transition: 0.3s;
 }
-/deep/.el-card__body {
+::v-deep .el-card__body {
   padding: 10px;
 }
-/deep/.el-form-item {
+::v-deep .el-form-item {
   margin-bottom: 12px !important;
 }
 </style>

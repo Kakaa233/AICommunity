@@ -12,7 +12,7 @@ import java.util.Date;
 public class User {
 
     /**
-     * 这里可以看做是手机号
+     * 这里可以看做是账号名
      */
     private String userId;
 

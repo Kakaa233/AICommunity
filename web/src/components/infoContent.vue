@@ -85,7 +85,7 @@ export default {
   methods: {
     newLikes() {
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/notice/list";
+      var url = "http://localhost:8081/notice/list";
       _self.$axios
         .get(url)
         .then((res) => {
@@ -141,7 +141,7 @@ export default {
     overflow-y: scroll;
   }
 }
-/deep/.el-menu-item {
+::v-deep .el-menu-item {
   font-size: 14px;
   color: #303133;
   padding: 0 207px !important;

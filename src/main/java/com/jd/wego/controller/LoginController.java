@@ -25,6 +25,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 /**
  * @author hbquan
  * @date 2021/3/31 16:30
@@ -108,10 +111,10 @@ public class LoginController {
     }
 
     /**
-     * 提供一个可以提供手机号+密码的方式进行登录
+     * 提供一个可以提供账号名+密码的方式进行登录
      */
-    @GetMapping("/loginPassword")
-    public Result<CodeMsg> loginPassword(String userId, String password) {
+    @PostMapping("/loginPassword")
+    public Result<CodeMsg> loginPassword(@RequestParam String userId, @RequestParam String password, HttpServletResponse response) {
         User user = userService.selectByUserId(userId);
         if (user == null) {
             return Result.error(CodeMsg.UNREGISTER_PHONE);
@@ -120,6 +123,7 @@ public class LoginController {
         if (!(user.getPassword().equals(MD5Utils.md5(password + user.getSalt())))) {
             return Result.error(CodeMsg.PASSWORD_ERROR);
         } else {
+            addCookie(response, user);
             return Result.success(CodeMsg.SUCCESS);
         }
     }

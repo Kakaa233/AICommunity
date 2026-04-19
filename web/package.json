@@ -12,8 +12,8 @@
     "core-js": "^3.6.5",
     "element-ui": "^2.14.1",
     "jquery": "^3.6.0",
-    "node-sass": "^5.0.0",
     "qs": "^6.10.1",
+    "sass": "^1.99.0",
     "vue": "^2.6.11",
     "vue-cookies": "^1.7.4",
     "vue-quill-editor": "^3.0.6"

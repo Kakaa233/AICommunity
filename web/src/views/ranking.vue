@@ -35,7 +35,7 @@ export default {
     getRanking() {
       var _self = this;
       var articleId = parseInt(_self.artId);
-      var url = "http://38617112yi.zicp.vip/TopAchieve";
+      var url = "http://localhost:8081/TopAchieve";
 
       _self.$axios
         .get(url, { params: { articleId: articleId } })
@@ -57,7 +57,7 @@ export default {
   height: 610px;
   background: #f3f1f1;
 }
-/deep/.el-main {
+::v-deep .el-main {
   display: block;
   flex: 1;
   flex-basis: auto;

@@ -53,7 +53,7 @@ export default {
 //   width: 100%;
 //   height: 100%;
 // }
-// >>> .el-form-item__label {
+// ::v-deep .el-form-item__label {
 //   color: #000 !important;
 // }
 </style>

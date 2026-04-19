@@ -30,7 +30,7 @@ export default {
   height: 610px;
   background: #f3f1f1;
 }
-/deep/.el-main {
+::v-deep .el-main {
   display: block;
   flex: 1;
   flex-basis: auto;

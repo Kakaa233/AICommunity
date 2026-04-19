@@ -13,6 +13,164 @@
               label-width="100px"
               class="demo-ruleForm"
             >
+              <el-form-item label="账号名" prop="userId">
+                <el-input
+                  v-model="loginInfo.userId"
+                  autocomplete="off"
+                  placeholder="请输入账号名"
+                ></el-input>
+              </el-form-item>
+              <el-form-item label="密码" prop="passWord">
+                <el-input
+                  type="password"
+                  v-model="loginInfo.passWord"
+                  autocomplete="off"
+                  placeholder="8位密码，字母、数字加英文符号（不包含空格）"
+                ></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button
+                  type="primary"
+                  @click="submitForm('ruleForm')"
+                  class="reg"
+                  >登录</el-button
+                >
+              </el-form-item>
+            </el-form>
+          </div>
+          <div
+            class="txt"
+            style="display: flex; justify-content: space-between"
+          >
+            <p style="margin-left: 95px; cursor: pointer" @click="goIndex()">
+              <i class="el-icon-back"></i> 返回
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "Login",
+  components: {},
+  data() {
+    return {
+      loginInfo: {
+        userId: "",
+        passWord: "",
+      },
+      rules: {
+        userId: [
+          { required: true, message: "请输入账号名", trigger: "blur" }
+        ],
+        passWord: [
+          { required: true, message: "请输入密码", trigger: "blur" },
+        ],
+      },
+    };
+  },
+  methods: {
+    goIndex() {
+      this.$router.push({ name: "index" });
+    },
+    submitForm(formName) {
+      const _self = this;
+      const userId = _self.loginInfo.userId;
+      const password = _self.loginInfo.passWord;
+      const url = "http://localhost:8081/login/loginPassword";
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          _self.$axios
+            .post(url, {
+              params: { userId: userId, password: password },
+            })
+            .then((res) => {
+              if (res.status == 200) {
+                if (res.data.code == 0) {
+                  _self.$message.success("登录成功");
+                  setTimeout(() => {
+                    _self.$router.push({ name: "index" });
+                    localStorage.setItem("user", userId);
+                  }, 500);
+                } else {
+                  _self.$message.error(res.data.msg);
+                }
+              }
+            });
+        }
+      });
+    },
+  },
+};
+</script>
+
+<style lang="scss" scoped>
+.images {
+  img {
+    width:40px;
+    height:40px;
+    margin-left:20px;
+  }
+}
+.container {
+  width: 1000px;
+  height: 700px;
+  background: #fff;
+  margin: 0 auto;
+  box-shadow: 0 15px 20px rgba(0, 0, 0, 0.11);
+  .banner {
+    width: 1000px;
+    height: 100px;
+    background: #409eff;
+    line-height: 100px;
+    font-size: 20px;
+    color: #fff;
+  }
+  .main {
+    width: 1000px;
+    height: 600px;
+    .phone {
+      width: 50%;
+      height: 250px;
+      margin: 150px auto;
+      position: relative;
+      .txt {
+        font-size: 12px;
+        color: rgb(148, 144, 144);
+      }
+    }
+  }
+}
+.btn {
+  position: absolute;
+  right: 0;
+  top: 72px;
+}
+.reg {
+  width: 100%;
+}
+.el-form-item {
+  margin-bottom: 32px;
+}
+</style>
+<template>
+  <div id="login">
+    <div class="container">
+      <div class="banner">登录账号</div>
+      <div class="main">
+        <div class="phone">
+          <div class="sjh">
+            <el-form
+              :model="loginInfo"
+              status-icon
+              :rules="rules"
+              ref="ruleForm"
+              label-width="100px"
+              class="demo-ruleForm"
+            >
               <el-form-item label="手机号" prop="phoneNumber">
                 <el-input
                   v-model="loginInfo.phoneNumber"
@@ -36,10 +194,10 @@
                 >
               </el-form-item>
               <div class="images">
-                <a href="http://38617112yi.zicp.vip/oauth/login">
+                <a href="http://localhost:8081/oauth/login">
                   <img src="@/assets/1.png" alt="" href="">
                 </a>
-                <a href="http://38617112yi.zicp.vip/oauth/qq">
+                <a href="http://localhost:8081/oauth/qq">
                   <img src="@/assets/2.png" alt="" href="">
                 </a>
                 
@@ -117,7 +275,7 @@ export default {
     },
     getCheckPass() {
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/login/sendSMSCode";
+      var url = "http://localhost:8081/login/sendSMSCode";
       var userId = _self.loginInfo.phoneNumber;
       _self.$message.success("验证码已发送到您的手机，请您注意查收~");
       _self.$axios
@@ -144,7 +302,7 @@ export default {
       const _self = this;
       const userId = _self.loginInfo.phoneNumber;
       const code = _self.loginInfo.checkPass;
-      const url = "http://38617112yi.zicp.vip/login/verifyLoginInfo";
+      const url = "http://localhost:8081/login/verifyLoginInfo";
       this.$refs[formName].validate((valid) => {
         if (valid) {
           _self.$axios

@@ -1,5 +1,6 @@
 module.export = {
     devServer: {
+      port: 8082,
       proxy: { //配置自动启动浏览器
               "/apis": {
                   target: "http://38617112yi.zicp.vip",

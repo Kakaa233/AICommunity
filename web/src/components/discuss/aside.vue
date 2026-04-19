@@ -126,17 +126,17 @@ export default {
         text-align: left;
         line-height: 55px;
         padding-left: 25px;
-        /deep/.el-menu-item.is-active {
+        ::v-deep .el-menu-item.is-active {
           border-right: 2px solid #409eff !important;
           background: #f0faff;
           color: #2d8cf0;
         }
-        /deep/.el-menu-item.is-active {
+        ::v-deep .el-menu-item.is-active {
           border-right: 2px solid #409eff !important;
           background: #f0faff !important;
           color: #2d8cf0 !important;
         }
-        /deep/.el-menu.el-menu--horizontal {
+        ::v-deep .el-menu.el-menu--horizontal {
           border-bottom: 0;
         }
         i {

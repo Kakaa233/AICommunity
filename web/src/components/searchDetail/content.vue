@@ -182,7 +182,7 @@ export default {
         display: inline-block;
         width: 50%;
       }
-      /deep/.el-input__inner {
+      ::v-deep .el-input__inner {
         -webkit-appearance: none;
         background-color: #fff;
         background-image: none;

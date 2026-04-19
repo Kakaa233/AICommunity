@@ -27,9 +27,9 @@ public class CodeMsg {
     /**
      * 登录模块错误
      */
-    public static CodeMsg VERIFY_CODE_ERROR = new CodeMsg(100000, "手机验证码错误");
-    public static CodeMsg DUPLICATE_REGISTRY = new CodeMsg(100001, "手机号码重复注册");
-    public static CodeMsg UNREGISTER_PHONE = new CodeMsg(100002, "手机号码未注册");
+    public static CodeMsg VERIFY_CODE_ERROR = new CodeMsg(100000, "验证码错误");
+    public static CodeMsg DUPLICATE_REGISTRY = new CodeMsg(100001, "重复注册");
+    public static CodeMsg UNREGISTER_PHONE = new CodeMsg(100002, "账号名未注册");
     public static CodeMsg PASSWORD_ERROR = new CodeMsg(100003, "登录密码错误");
     public static CodeMsg GITHUB_CODE_OR_STATE_EMPTY = new CodeMsg(100004, "Github获取code或者state为null");
     public static CodeMsg GITHUB_REQUEST_TOKEN_EMPTY = new CodeMsg(100005, "Github请求获取Token失败");
