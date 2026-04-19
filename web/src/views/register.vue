@@ -103,7 +103,7 @@ export default {
       this.$router.push({ name: "index" });
     },
     goLogin() {
-      this.$router.push({ name: "login" });
+      this.$router.push({ path: "/login" });
     },
     submitForm(formName) {
       const _self = this;
@@ -121,7 +121,7 @@ export default {
                 if (res.data.code == 0) {
                   _self.$message.success("注册成功");
                   setTimeout(() => {
-                    _self.$router.push({ name: "login" });
+                    _self.$router.push({ path: "/login" });
                   }, 500);
                 } else {
                   _self.$message.error(res.data.msg || "注册失败");
