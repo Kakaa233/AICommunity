@@ -3,6 +3,7 @@ import Router from 'vue-router'
 
 Vue.use(Router)
 
+//TODO:整明白这个auth.vue是干啥的
 
 const routes = [
     {
@@ -18,7 +19,7 @@ const routes = [
     {
         path: '/login',
         name: 'login',
-        component: () => import('@/views/login')
+        component: () => import('@/views/auth')
     },
     {
         path: '/chat',
@@ -28,7 +29,7 @@ const routes = [
     {
         path: '/register',
         name: 'register',
-        component: () => import('@/views/register')
+        component: () => import('@/views/auth')
     },
     {
         path: '/writeArticle',

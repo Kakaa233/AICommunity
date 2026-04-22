@@ -27,20 +27,6 @@
         <!-- 登录表单 -->
         <div class="form-content login-form" v-if="activeTab === 'login'">
           <h3>登入账号</h3>
-          <div class="third-party">
-            <span>选择登录方式或电子邮箱登录</span>
-            <div class="icons">
-              <a href="http://38617112yi.zicp.vip/oauth/login" class="icon">
-                <i class="el-icon-mobile-phone"></i>
-              </a>
-              <a href="http://38617112yi.zicp.vip/oauth/qq" class="icon">
-                <i class="el-icon-chat-dot-square"></i>
-              </a>
-              <div class="icon">
-                <i class="el-icon-message"></i>
-              </div>
-            </div>
-          </div>
           <el-form
             :model="loginInfo"
             status-icon
@@ -48,19 +34,20 @@
             ref="loginForm"
             class="login-form-content"
           >
-            <el-form-item prop="phoneNumber">
+            <el-form-item prop="userId">
               <el-input
-                v-model="loginInfo.phoneNumber"
+                v-model="loginInfo.userId"
                 autocomplete="off"
-                placeholder="手机号"
+                placeholder="账号名"
                 class="custom-input"
               ></el-input>
             </el-form-item>
-            <el-form-item prop="checkPass">
+            <el-form-item prop="password">
               <el-input
-                v-model="loginInfo.checkPass"
+                type="password"
+                v-model="loginInfo.password"
                 autocomplete="off"
-                placeholder="验证码"
+                placeholder="密码"
                 class="custom-input"
               ></el-input>
             </el-form-item>
@@ -72,9 +59,6 @@
                 class="sign-btn"
                 >SIGN IN</el-button
               >
-              <el-button type="primary" class="get-code-btn"
-                @click="getLoginCode">获取验证码</el-button
-              >
             </div>
           </el-form>
         </div>
@@ -82,20 +66,6 @@
         <!-- 注册表单 -->
         <div class="form-content register-form" v-if="activeTab === 'register'">
           <h3 style="font-size: 24px; font-weight: 600; color: #333; margin-bottom: 24px; text-align: center; display: block; visibility: visible; opacity: 1;">创建账号</h3>
-          <div class="third-party">
-            <span>选择已有方式或电子邮箱注册</span>
-            <div class="icons">
-              <a href="http://38617112yi.zicp.vip/oauth/login" class="icon">
-                <i class="el-icon-mobile-phone"></i>
-              </a>
-              <a href="http://38617112yi.zicp.vip/oauth/qq" class="icon">
-                <i class="el-icon-chat-dot-square"></i>
-              </a>
-              <div class="icon">
-                <i class="el-icon-message"></i>
-              </div>
-            </div>
-          </div>
           <el-form
             :model="registerInfo"
             status-icon
@@ -103,28 +73,20 @@
             ref="registerForm"
             class="register-form-content"
           >
-            <el-form-item prop="phoneNumber">
+            <el-form-item prop="userId">
               <el-input
-                v-model="registerInfo.phoneNumber"
+                v-model="registerInfo.userId"
                 autocomplete="off"
-                placeholder="Name"
+                placeholder="账号名"
                 class="custom-input"
               ></el-input>
             </el-form-item>
-            <el-form-item prop="checkPass">
-              <el-input
-                v-model="registerInfo.checkPass"
-                autocomplete="off"
-                placeholder="Email"
-                class="custom-input"
-              ></el-input>
-            </el-form-item>
-            <el-form-item prop="passWord">
+            <el-form-item prop="password">
               <el-input
                 type="password"
-                v-model="registerInfo.passWord"
+                v-model="registerInfo.password"
                 autocomplete="off"
-                placeholder="Password"
+                placeholder="密码"
                 class="custom-input"
               ></el-input>
             </el-form-item>
@@ -135,9 +97,6 @@
                 @click="submitRegister('registerForm')"
                 class="sign-btn"
                 >SIGN UP</el-button
-              >
-              <el-button type="primary" class="get-code-btn"
-                @click="getRegisterCode">获取验证码</el-button
               >
             </div>
           </el-form>
@@ -154,22 +113,21 @@ export default {
     return {
       activeTab: this.$route.name === 'register' ? 'register' : 'login', // 根据路由自动显示
       loginInfo: {
-        phoneNumber: "",
-        checkPass: "",
+        userId: "",
+        password: "",
       },
       registerInfo: {
-        phoneNumber: "",
-        passWord: "",
-        checkPass: "",
+        userId: "",
+        password: "",
       },
       loginRules: {
-        phoneNumber: [
-          { required: true, message: "请输入手机号", trigger: "blur" },
+        userId: [
+          { required: true, message: "请输入账号名", trigger: "blur" },
           {
             validator: function (rule, value, callback) {
-              var MobileRegex = /^1[3|4|5|7|8][0-9]{9}$/;
-              if (!MobileRegex.test(value)) {
-                callback(new Error("请输入正确的手机号码！"));
+              var Regex = /^[a-zA-Z0-9_]{5,20}$/;
+              if (!Regex.test(value) || /^\d+$/.test(value)) {
+                callback(new Error("5-20个字母数字下划线，且不能是纯数字"));
               } else {
                 callback();
               }
@@ -177,12 +135,13 @@ export default {
             trigger: "blur",
           },
         ],
-        checkPass: [
-          { required: true, message: "请输入验证码", trigger: "blur" },
+        password: [
+          { required: true, message: "请输入密码", trigger: "blur" },
           {
             validator: function (rule, value, callback) {
-              if (!/^[0-9]{6}$/.test(value)) {
-                callback(new Error("验证码必须是六位数字"));
+              var res = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/;
+              if (!res.test(value)) {
+                callback(new Error("8-20个字符，至少一个字母和一个数字"));
               } else {
                 callback();
               }
@@ -192,13 +151,13 @@ export default {
         ],
       },
       registerRules: {
-        phoneNumber: [
-          { required: true, message: "请输入手机号", trigger: "blur" },
+        userId: [
+          { required: true, message: "请输入账号名", trigger: "blur" },
           {
             validator: function (rule, value, callback) {
-              var MobileRegex = /^1[3|4|5|7|8][0-9]{9}$/;
-              if (!MobileRegex.test(value)) {
-                callback(new Error("请输入正确的手机号码！"));
+              var Regex = /^[a-zA-Z0-9_]{5,20}$/;
+              if (!Regex.test(value) || /^\d+$/.test(value)) {
+                callback(new Error("5-20个字母数字下划线，且不能是纯数字"));
               } else {
                 callback();
               }
@@ -206,26 +165,13 @@ export default {
             trigger: "blur",
           },
         ],
-        checkPass: [
-          { required: true, message: "请输入验证码", trigger: "blur" },
-          {
-            validator: function (rule, value, callback) {
-              if (!/^[0-9]{6}$/.test(value)) {
-                callback(new Error("验证码必须是六位数字"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-        passWord: [
+        password: [
           { required: true, message: "请输入密码", trigger: "blur" },
           {
             validator: function (rule, value, callback) {
-              var res = /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/;
+              var res = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/;
               if (!res.test(value)) {
-                callback(new Error("请输入正确的密码格式~"));
+                callback(new Error("8-20个字符，至少一个字母和一个数字"));
               } else {
                 callback();
               }
@@ -249,42 +195,17 @@ export default {
       this.$router.push({ name: "index" });
     },
     // 登录相关方法
-    getLoginCode() {
-      var _self = this;
-      var url = "http://38617112yi.zicp.vip/login/sendSMSCode";
-      var userId = _self.loginInfo.phoneNumber;
-      _self.$message.success("验证码已发送到您的手机，请您注意查收~");
-      _self.$axios
-        .get(url, {
-          params: { 
-            userId: userId,
-          },
-          withCredentials:true
-        })
-        .then((res) => {
-          console.log(res.data);
-          if (res.status == 200) {
-            if (res.data.code == 0) {
-              //_self.$message.success("验证码已发送到您的手机，请您注意查收~");
-            }
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
     submitLogin(formName) {
       console.log(11111);
       const _self = this;
-      const userId = _self.loginInfo.phoneNumber;
-      const code = _self.loginInfo.checkPass;
+      const userId = _self.loginInfo.userId;
+      const password = _self.loginInfo.password;
       const url = "http://38617112yi.zicp.vip/login/verifyLoginInfo";
       this.$refs[formName].validate((valid) => {
         if (valid) {
           _self.$axios
             .get(url, {
-              //将对象 序列化成URL的形式，以&进行拼接
-              params: { userId: userId, code: code },
+              params: { userId: userId, password: password },
             })
             .then((res) => {
               console.log(res);
@@ -309,48 +230,24 @@ export default {
       });
     },
     // 注册相关方法
-    getRegisterCode() {
-      var _self = this;
-      var url = "http://38617112yi.zicp.vip/register/sendSMSCode";
-      var userId = _self.registerInfo.phoneNumber;
-      _self.$axios
-        .get(url, {
-          params: { userId: userId },
-        })
-        .then((res) => {
-          console.log(res.data);
-          if (res.status == 200) {
-            if (res.data.code == 0) {
-              _self.$message.success("验证码已发送到您的手机，请您注意查收~");
-              // _self.check = res.data.message;
-              // console.log(_self.check);
-            }
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
     submitRegister(formName) {
       const _self = this;
-      const userId = _self.registerInfo.phoneNumber;
-      const password = _self.registerInfo.passWord;
-      const code = _self.registerInfo.checkPass;
+      const userId = _self.registerInfo.userId;
+      const password = _self.registerInfo.password;
       const url = "http://38617112yi.zicp.vip/register/verifyRegisterInfo";
       this.$refs[formName].validate((valid) => {
         if (valid) {
           _self.$axios
             .get(url, {
-              //将对象 序列化成URL的形式，以&进行拼接
-              params: { userId: userId, password: password, code: code },
+              params: { userId: userId, password: password },
             })
             .then((res) => {
               console.log(res);
               if (res.status == 200) {
                 if (res.data.code == 0) {
-                  _self.$message.success("注册成功");
+                  _self.$message.success("注册成功，请重新登录");
                   setTimeout(() => {
-                    _self.$router.push({ name: "login" });
+                    _self.switchTab('login');
                   }, 500);
                 } else if (res.data.code == 100000) {
                   _self.$message.success(res.data.msg);
