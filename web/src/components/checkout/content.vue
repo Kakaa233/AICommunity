@@ -37,9 +37,9 @@ export default {
           address: "全国高校，一览无遗",
         },
         {
-          imgSrc: require("@/assets/xkd.webp"),
-          name: "西安科技大学",
-          address: "陕西省西安市临潼区斜口街道",
+          imgSrc: require("@/assets/buaa.png"),
+          name: "北京航空航天大学",
+          address: "北京市海淀区学院路37号",
         },
       ],
     };

@@ -1,18 +1,16 @@
 <template>
   <div class="checkout">
-    <Header></Header>
     <Content></Content>
   </div>
 </template>
 <script>
-import Header from "../components/checkout/header.vue";
 import Content from "../components/checkout/content.vue";
 export default {
   name: "checkout",
   data() {
     return {};
   },
-  components: { Header, Content },
+  components: { Content },
 };
 </script>
 <style lang="scss" scoped>

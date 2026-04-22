@@ -120,7 +120,7 @@ export default {
   methods: {
     guanzhuList() {
       var _self = this;
-      var url = "http://localhost:8081/fans/list";
+      var url = "http://38617112yi.zicp.vip/fans/list";
       //var categoryId = this.id;
 
       _self.$axios

@@ -152,7 +152,6 @@ export default {
         this.$router.push({ path: url, query: { urlid: num } });
         this.$store.commit("savemenueobj", { menueurl: url, menuemun: num });
       } else {
-        // empty block
       }
     },
   },

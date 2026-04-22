@@ -1,9 +1,6 @@
 <template>
   <div class="info">
     <el-container>
-      <el-header style="padding: 0; height: 80px">
-        <Header></Header>
-      </el-header>
       <el-container>
         <el-aside width="252px" style="margin-left: 40px; margin-top: 20px">
           <Aside></Aside
@@ -16,12 +13,11 @@
   </div>
 </template>
 <script>
-import Header from "../components/banner.vue";
 import Aside from "../components/personal/aside.vue";
 import Main from "../components/rankingContent.vue";
 export default {
   //name: "info",
-  components: { Header, Aside, Main },
+  components: { Aside, Main },
   data() {
     return {
       rankingList: []
@@ -35,7 +31,7 @@ export default {
     getRanking() {
       var _self = this;
       var articleId = parseInt(_self.artId);
-      var url = "http://localhost:8081/TopAchieve";
+      var url = "http://38617112yi.zicp.vip/TopAchieve";
 
       _self.$axios
         .get(url, { params: { articleId: articleId } })
@@ -54,15 +50,26 @@ export default {
 <style lang="scss" scoped>
 .info {
   width: 1278px;
-  height: 610px;
-  background: #f3f1f1;
+  min-height: 610px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+  border-radius: 12px;
+  padding: 20px;
 }
+
 ::v-deep .el-main {
   display: block;
   flex: 1;
   flex-basis: auto;
-  overflow: none !important;
+  overflow: auto !important;
   box-sizing: border-box;
   padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+::v-deep .el-aside {
+  margin-left: 0 !important;
+  margin-top: 0 !important;
 }
 </style>

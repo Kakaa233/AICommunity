@@ -1,89 +1,60 @@
 <template>
   <div id="banner">
-    <el-row>
-      <el-col :span="4">
-        <div class="logo">
-          <img src="../assets/logo.jpg" alt="" />
-          <p>社区</p>
-        </div>
-      </el-col>
-      <el-col :span="3"
-        ><div
-          class="tlq"
-          @click="goTlq()"
-          style="
-            font-size: 15px;
-            margin-top: 15px;
-            text-align: left;
-            cursor: pointer;
-          "
-        >
-          讨论区
-        </div></el-col
-      >
-      <el-col :span="8" style="position: relative; padding-right: 50px">
+    <div class="banner-container">
+      <div class="logo" @click="goTlq()">
+        <img src="../assets/buaa.png" alt="北京航空航天大学" />
+        <p>社区</p>
+      </div>
+
+      <div class="tlq" @click="goTlq()">
+        <i class="el-icon-chat-dot-square"></i>
+        讨论区
+      </div>
+
+      <div class="search-box">
         <el-input
           v-model="inputSearch"
           prefix-icon="el-icon-search"
           @keyup.enter.native="onEnterSearch"
-          placeholder="请输入"
-          style="padding-right: 180px"
+          placeholder="搜索内容..."
+          class="search-input"
         >
         </el-input>
-        <el-button
-          type="primary"
-          style="position: absolute; right: 139px; top: 30px"
-          @click="onEnterSearch()"
-        >
-          搜索</el-button
-        >
-      </el-col>
-      <el-col :span="3">
-        <el-button type="primary" round @click="check()">
-          <i class="el-icon-s-home"></i> 切换学校</el-button
-        >
-      </el-col>
+        <el-button type="primary" class="search-btn" @click="onEnterSearch()">
+          搜索
+        </el-button>
+      </div>
 
-      <el-col :span="6">
-        <div class="right">
-          <div class="btn">
-            <el-button type="primary" round @click="goWrite()"
-              ><i class="el-icon-edit"></i>写文章</el-button
-            >
-          </div>
-          <el-avatar
-            :size="40"
-            :src="imgSrc"
-            style="
-              display: inline-block;
-              margin-top: 22px;
-              margin-left: 20px;
-              margin-right: 10px;
-              cursor: pointer;
-            "
-            @click="goPersonal()"
-          ></el-avatar>
-          <div class="denglu" v-if="display == true">
-            <span @click="goRes()">注册</span>|<span @click="goLogin()"
-              >登录</span
-            >
-          </div>
-          <div class="person" v-else-if="!store" @click="goPersonal()">
-            <el-badge :value="0" class="item">
-              <p style="height: 30px; line-height: 30px">个人中心</p>
-            </el-badge>
-            <span @click="goReturn()">退出</span>
-          </div>
-          <div class="person" v-else @click="goPersonal()">
-            <el-badge :value="1" class="item">
-              <p style="height: 30px; line-height: 30px">个人中心</p>
-            </el-badge>
-            <span @click="goReturn()">退出</span>
-            
-          </div>
+      <div class="actions">
+        <el-button round @click="check()" class="action-btn school-btn">
+          <i class="el-icon-s-home"></i> 切换学校
+        </el-button>
+
+        <el-button round type="primary" class="action-btn write-btn" @click="goWrite()">
+          <i class="el-icon-edit"></i>写文章
+        </el-button>
+
+        <el-avatar
+          :size="36"
+          :src="imgSrc"
+          class="user-avatar"
+          @click.native="goPersonal()"
+        ></el-avatar>
+
+        <div class="auth-links" v-if="display == true">
+          <span @click="goRes()">注册</span>
+          <span class="divider">|</span>
+          <span @click="goLogin()">登录</span>
         </div>
-      </el-col>
-    </el-row>
+
+        <div class="user-info" v-else @click="goPersonal()">
+          <el-badge :value="store ? 1 : 0" class="item">
+            <span class="nickname">个人中心</span>
+          </el-badge>
+          <span class="logout" @click.stop="goReturn()">退出</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -193,7 +164,7 @@ export default {
       const inputSearch = this.inputSearch;
       var _self = this;
       
-      var url = "http://localhost:8081/article/search";
+      var url = "http://38617112yi.zicp.vip/article/search";
 
       _self.$axios
         .get(url, { params: { keyword: inputSearch } })
@@ -218,154 +189,241 @@ export default {
 #banner {
   height: 80px;
   background: #fff;
-  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.11);
-  .logo {
-    width: 160px;
-    height: 60px;
-    line-height: 20px;
-    display: flex;
-    margin-right: 100px;
-    margin-top: 10px;
-    img {
-      width: 70px;
-      margin-left: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: 100%;
+  left: 0;
+  right: 0;
+}
+
+.banner-container {
+  width: 95%;
+  max-width: 1400px;
+  height: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  img {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    transition: transform 0.3s;
+    margin-right: 10px;
+  }
+
+  &:hover img {
+    transform: scale(1.05);
+  }
+
+  p {
+    font-size: 22px;
+    color: #113056;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+}
+
+.tlq {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  color: #606266;
+  cursor: pointer;
+  transition: color 0.3s;
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 20px;
+
+  i {
+    font-size: 18px;
+  }
+
+  &:hover {
+    color: #113056;
+    background: rgba(17, 48, 86, 0.08);
+  }
+}
+
+.search-box {
+  flex: 1;
+  max-width: 500px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .search-input {
+    flex: 1;
+
+    ::v-deep .el-input__inner {
+      border-radius: 20px;
+      height: 40px;
+      line-height: 40px;
+      padding: 0 20px 0 40px;
+      border: 1px solid #DCDFE6;
+      transition: all 0.3s;
+
+      &:focus {
+        border-color: #113056;
+        box-shadow: 0 0 0 2px rgba(17, 48, 86, 0.1);
+      }
+
+      &::placeholder {
+        color: #C0C4CC;
+      }
     }
-    p {
-      font-size: 22px;
-      margin-top: 25px;
-      color: rgb(63, 61, 61);
-    }
-  }
-  .el-col-6 {
-    width: 25%;
-    height: 80px;
-  }
-  .el-menu {
-    list-style: none;
-    position: relative;
-    margin: 0;
-    padding-left: 0;
-    height: 80px;
-    background-color: #fff;
-  }
-  .el-menu--horizontal > .el-menu-item {
-    float: left;
-    height: 60px;
-    line-height: 100px;
-    margin: 0;
-  }
-  .el-menu-item {
-    font-size: 15px;
-    color: #303133;
-    line-height: 100px;
-    height: 80px !important;
-    padding: 0 10px;
-    margin-right: 120px;
-    cursor: pointer;
-    transition: border-color 0.3s, background-color 0.3s, color 0.3s;
-    box-sizing: border-box;
-    &:hover {
-      color: #613aee;
+
+    ::v-deep .el-input__prefix {
+      left: 12px;
+
+      i {
+        font-size: 16px;
+        color: #909399;
+      }
     }
   }
 
-  .el-button.is-round {
+  .search-btn {
+    flex-shrink: 0;
     border-radius: 20px;
     padding: 10px 20px;
+    background: linear-gradient(135deg, #113056 0%, #91CFD5 100%);
+    border: none;
+    transition: all 0.3s;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(17, 48, 86, 0.4);
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  border-radius: 20px;
+  padding: 10px 18px;
+  font-size: 14px;
+  transition: all 0.3s;
+
+  &.school-btn {
+    background: #fff;
+    border: 1px solid #DCDFE6;
+    color: #606266;
+
+    &:hover {
+      border-color: #113056;
+      color: #113056;
+      background: rgba(17, 48, 86, 0.05);
+    }
   }
 
-  .right {
-    line-height: 80px;
-    display: flex;
-    .btn {
-      .el-button {
-        font-size: 16px;
-      }
-    }
-    .denglu {
-      // margin-left: 60px;
-      span {
-        font-size: 15px;
-        margin-right: 5px;
-        margin-left: 5px;
-        cursor: pointer;
-      }
-    }
-    .person {
-      line-height: 90px;
-      font-size: 16px;
-      cursor: pointer;
-      span {
-        font-size: 15px;
-        margin-left: 25px;
-        cursor: pointer;
-      }
+  &.write-btn {
+    background: linear-gradient(135deg, #113056 0%, #91CFD5 100%);
+    border: none;
+    color: #fff;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(17, 48, 86, 0.4);
     }
   }
 }
-#banner .right .btn .el-button[data-v-37aed33c] {
-  font-size: 14px;
-}
-#banner .right[data-v-37aed33c] {
-  line-height: 100px;
-  display: flex;
-}
-.el-col-7 {
-  width: 29.16667%;
-  height: 80px;
-  line-height: 100px;
-}
-::v-deep .el-input {
-  position: relative;
-  font-size: 14px;
-  display: inline-block;
-  width: 70% !important;
-}
-::v-deep .el-input__inner {
-  -webkit-appearance: none;
-  background-color: #fff;
-  background-image: none;
-  border-radius: 4px;
-  border: 1px solid #dcdfe6;
-  box-sizing: border-box;
-  color: #606266;
-  display: inline-block;
-  font-size: inherit;
-  height: 40px;
-  line-height: 40px;
-  outline: 0;
-  padding: 0 30px;
-  transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
-  width: 100%;
-  margin-top: 30px !important;
-}
-::v-deep .el-input__prefix {
-  left: 5px;
-  top: 16px;
-  transition: all 0.3s;
-}
-::v-deep .el-col-3 {
-  width: 12.5%;
-  margin-top: 31px !important;
-}
-.tlq {
+
+.user-avatar {
+  cursor: pointer;
+  transition: transform 0.3s;
+  border: 2px solid #f0f0f0;
+
   &:hover {
-    // border-bottom: 1px#83adec solid;
-    color: #83adec;
+    transform: scale(1.1);
+    border-color: #113056;
   }
 }
-.bk {
-  text-align: left;
-  margin-left: 30px;
-  font-size: 16px;
-  &:before {
-    content: "";
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    background: red;
-    margin-right: 5px;
+
+.auth-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+
+  span {
+    color: #606266;
+    cursor: pointer;
+    transition: color 0.3s;
+    padding: 4px 8px;
+    border-radius: 4px;
+
+    &:hover {
+      color: #113056;
+      background: rgba(17, 48, 86, 0.08);
+    }
+
+    &.divider {
+      color: #DCDFE6;
+      cursor: default;
+      padding: 0;
+
+      &:hover {
+        color: #DCDFE6;
+        background: none;
+      }
+    }
   }
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+
+  .nickname {
+    font-size: 14px;
+    color: #606266;
+    padding: 6px 12px;
+    border-radius: 16px;
+    transition: all 0.3s;
+
+    &:hover {
+      background: rgba(64, 158, 255, 0.08);
+      color: #409EFF;
+    }
+  }
+
+  .logout {
+    font-size: 14px;
+    color: #909399;
+    transition: color 0.3s;
+
+    &:hover {
+      color: #F56C6C;
+    }
+  }
+}
+
+::v-deep .el-badge__content {
+  background: #F56C6C;
+  border: none;
 }
 </style>
 

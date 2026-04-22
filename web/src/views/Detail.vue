@@ -1,11 +1,9 @@
 <template>
   <div id="Detail">
-    <Header></Header>
     <Content></Content>
   </div>
 </template>
 <script>
-import Header from "../components/banner.vue";
 import Content from "../components/detail/content.vue";
 export default {
   name: "detail",
@@ -13,7 +11,6 @@ export default {
     return {};
   },
   components: {
-    Header,
     Content,
   },
   methods: {},

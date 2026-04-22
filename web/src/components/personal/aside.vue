@@ -76,31 +76,109 @@ export default {
       ],
     };
   },
+  created() {
+    // 初始化时根据当前路由设置activeIndex
+    this.updateActiveIndex();
+  },
+  watch: {
+    // 监听路由变化，更新activeIndex
+    $route: {
+      handler() {
+        this.updateActiveIndex();
+      },
+      immediate: true
+    }
+  },
   methods: {
     handleSelect(value) {
+      this.activeIndex = value;
       var url = this.listData[value - 1].url;
-      this.$router.push({ name: url,
+      this.$router.push({ 
+        name: url,
         params: {
           userId: '18392710807'
         }
       });
     },
+    updateActiveIndex() {
+      // 根据当前路由名称查找对应的索引
+      const currentRoute = this.$route.name;
+      const item = this.listData.find(item => item.url === currentRoute);
+      if (item) {
+        this.activeIndex = item.asideIndex.toString();
+      } else {
+        // 默认选中第一个
+        this.activeIndex = "1";
+      }
+    }
   },
 };
 </script>
 <style lang="scss" scoped>
 .aside {
   width: 230px;
-  height: 500px;
+  min-height: 500px;
   background: #fff;
-  border-radius: 4px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 }
+
 ::v-deep .el-menu {
   border-right: 0 !important;
-  list-style: none;
-  position: relative;
-  margin: 0;
-  padding-left: 0;
-  background-color: #fff;
+
+  .el-menu-item {
+    height: 55px;
+    line-height: 55px;
+    font-size: 14px;
+    color: #606266;
+    transition: all 0.3s;
+    position: relative;
+    padding-left: 20px !important;
+
+    i {
+      margin-right: 12px;
+      font-size: 18px;
+      color: #909399;
+      transition: all 0.3s;
+    }
+
+    &:hover {
+      background: linear-gradient(90deg, rgba(17, 48, 86, 0.08) 0%, transparent 100%);
+      color: #113056;
+
+      i {
+        color: #113056;
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  .el-menu-item.is-active {
+    background: linear-gradient(90deg, rgba(17, 48, 86, 0.12) 0%, transparent 100%);
+    color: #113056;
+    font-weight: 500;
+    border-right: none;
+
+    i {
+      color: #113056;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 24px;
+      background: linear-gradient(180deg, #113056, #91CFD5);
+      border-radius: 2px 0 0 2px;
+    }
+  }
+}
+
+::v-deep .el-menu--horizontal > .el-menu-item {
+  float: none;
 }
 </style>

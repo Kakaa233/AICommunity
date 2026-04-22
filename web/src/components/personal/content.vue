@@ -1,132 +1,100 @@
 <template>
   <div class="content">
-    <div class="info">基本信息</div>
-    <el-row>
-      <el-col :span="12" style="border-right: 1px #eee solid">
-        <div style="display: flex; margin-bottom: 20px">
-          <p style="font-size: 14px; color: #333; margin-left: 80px">
-            我的昵称：
-          </p>
-          <p style="font-size: 14px; color: #999; margin-left: 10px">
-            {{userObj.nickname}}
-          </p>
+    <div class="info-header">
+      <h2 class="info-title">基本信息</h2>
+      <el-button 
+        type="primary" 
+        plain 
+        @click="changeStatus()"
+        class="edit-btn"
+      >
+        <i class="el-icon-edit"></i> 编辑资料
+      </el-button>
+    </div>
+    
+    <!-- 查看模式 -->
+    <div class="view-mode" v-if="!display">
+      <div class="user-profile">
+        <div class="avatar-section">
+          <el-avatar :size="80" :src="userObj.avatar" class="user-avatar"></el-avatar>
+          <h3 class="user-nickname">{{userObj.nickname}}</h3>
+          <p class="user-signature" v-if="userObj.signature">{{userObj.signature}}</p>
+          <p class="user-signature" v-else>暂无个性签名</p>
         </div>
-        <div style="display: flex; margin-bottom: 30px">
-          <p style="font-size: 14px; color: #333; margin-left: 80px">
-            我的图像：
-          </p>
-          <el-avatar
-            :size="40"
-            :src="userObj.avatar"
-            style="font-size: 14px; color: #999; margin-left: 10px"
-          ></el-avatar>
-          <!-- <p style="font-size: 14px; color: #999; margin-left: 10px">
-            15019689912
-          </p> -->
+        
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">性别</span>
+            <span class="info-value">{{userObj.sex === 1 ? '男' : '女'}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">学校</span>
+            <span class="info-value">{{userObj.school || '未设置'}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">用户ID</span>
+            <span class="info-value">{{userObj.userId}}</span>
+          </div>
         </div>
-        <!-- <div style="display: flex; margin-bottom: 30px">
-          <p style="font-size: 14px; color: #333; margin-left: 80px">
-            真实姓名：
-          </p>
-          <p style="font-size: 14px; color: #999; margin-left: 10px">喵喵</p>
-        </div> -->
-        <div style="display: flex; margin-bottom: 30px">
-          <p style="font-size: 14px; color: #333; margin-left: 80px">
-            我的性别：
-          </p>
-          <p style="font-size: 14px; color: #999; margin-left: 10px">女</p>
-        </div>
-        <div style="display: flex; margin-bottom: 30px">
-          <p style="font-size: 14px; color: #333; margin-left: 80px">
-            我的学校：
-          </p>
-          <p style="font-size: 14px; color: #999; margin-left: 10px">
-            {{userObj.school}}
-          </p>
-        </div>
-        <!-- <div style="display: flex; margin-bottom: 30px">
-          <p style="font-size: 14px; color: #333; margin-left: 80px">
-            毕业年份：
-          </p>
-          <p style="font-size: 14px; color: #999; margin-left: 10px">
-            2021-07-01
-          </p>
-        </div> -->
-        <div style="display: flex; margin-bottom: 30px">
-          <p style="font-size: 14px; color: #333; margin-left: 80px">
-            个性签名：
-          </p>
-          <p style="font-size: 14px; color: #999; margin-left: 10px">嘿嘿嘿</p>
-        </div>
-        <el-button
-          style="margin-top: 62px"
-          type="primary"
-          @click="changeStatus()"
-          >编辑</el-button
-        >
-      </el-col>
-      <el-col :span="12" v-if="display == true">
-        <el-form ref="form" :model="form" label-width="100px" size="small">
-          <el-form-item label="图像" prop="pic" class="changeImg">
-            <el-upload
-              class="avatar-uploader"
-              action="http://localhost:8081/upload/images"
-              :show-file-list="false"
-              :on-success="handleAvatarSuccess"
-              :before-upload="beforeAvatarUpload"
-              name="file"
-            >
-              <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-              <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-            </el-upload>
-          </el-form-item>
-          <el-form-item label="昵称">
-            <el-input v-model="form.title"></el-input>
-          </el-form-item>
-          <el-form-item label="学校">
-            <el-input v-model="form.school"></el-input>
-          </el-form-item>
-          <!-- <el-form-item label="真实姓名">
-            <el-input
-              v-model="form.name"
-              placeholder="请输入你的真实姓名"
-            ></el-input>
-          </el-form-item> -->
-          <el-form-item label="性别">
-            <el-radio-group v-model="form.sex">
-              <el-radio label="男"></el-radio>
-              <el-radio label="女"></el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <!-- <el-form-item label="毕业年份">
-            <el-date-picker
-              type="date"
-              placeholder="选择日期"
-              v-model="form.date"
-              style="width: 100%"
-            ></el-date-picker>
-          </el-form-item> -->
-          <el-form-item label="个性签名">
-            <el-input
-              type="textarea"
-              v-model="form.signature"
-              placeholder="懒的连签名都没有...."
-            ></el-input>
-          </el-form-item>
-
-          <el-button
-            style="margin-top: 20px"
-            size="max"
-            type="primary"
-            @click="submit()"
-            >提交</el-button
+      </div>
+    </div>
+    
+    <!-- 编辑模式 -->
+    <div class="edit-mode" v-if="display">
+      <el-form ref="form" :model="form" label-width="100px" class="edit-form">
+        <el-form-item label="头像" prop="pic">
+          <el-upload
+            class="avatar-uploader"
+            action="http://38617112yi.zicp.vip/upload/images"
+            :show-file-list="false"
+            :on-success="handleAvatarSuccess"
+            :before-upload="beforeAvatarUpload"
+            name="file"
           >
-        </el-form>
-      </el-col>
-      <el-col :span="12" v-else>
-        <div></div>
-      </el-col>
-    </el-row>
+            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+            <img v-else-if="userObj.avatar" :src="userObj.avatar" class="avatar" />
+            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+          </el-upload>
+        </el-form-item>
+        
+        <el-form-item label="昵称">
+          <el-input 
+            v-model="form.title" 
+            placeholder="请输入昵称"
+            class="custom-input"
+          ></el-input>
+        </el-form-item>
+        
+        <el-form-item label="学校">
+          <el-input 
+            v-model="form.school" 
+            placeholder="请输入学校"
+            class="custom-input"
+          ></el-input>
+        </el-form-item>
+        
+        <el-form-item label="性别">
+          <el-radio-group v-model="form.sex" class="sex-radio-group">
+            <el-radio label="男"></el-radio>
+            <el-radio label="女"></el-radio>
+          </el-radio-group>
+        </el-form-item>
+        
+        <el-form-item label="个性签名">
+          <el-input
+            type="textarea"
+            v-model="form.signature"
+            placeholder="懒的连签名都没有...."
+            class="custom-textarea"
+          ></el-input>
+        </el-form-item>
+
+        <div class="form-actions">
+          <el-button @click="display = false" class="cancel-btn">取消</el-button>
+          <el-button type="primary" @click="submit()" class="submit-btn">保存修改</el-button>
+        </div>
+      </el-form>
+    </div>
   </div>
 </template>
 <script>
@@ -160,20 +128,13 @@ export default {
   methods: {
     newLikes() {
       var _self = this;
-      var url = "http://localhost:8081/notice/list";
+      var url = "http://38617112yi.zicp.vip/notice/list";
       _self.$axios
         .get(url)
         .then((res) => {
           if (res.status == 200) {
             
               console.log('新消息',res.data)
-              //let args = res.data.data;
-              // let list = []
-              // args.forEach(item => {
-              //   list.push(item.userId)
-              // });
-              //_self.followList = res.data.data;
-            //    _self.userObj = res.data.data;
           }
         })
         .catch((err) => {
@@ -183,19 +144,13 @@ export default {
     getUserInfo() {
 
       var _self = this;
-      var url = "http://localhost:8081/userInfo";
+      var url = "http://38617112yi.zicp.vip/userInfo";
       _self.$axios
         .get(url)
         .then((res) => {
           if (res.status == 200) {
             
               console.log('用户信息',res.data)
-              //let args = res.data.data;
-              // let list = []
-              // args.forEach(item => {
-              //   list.push(item.userId)
-              // });
-              //_self.followList = res.data.data;
               _self.userObj = res.data.data;
               localStorage.setItem('myuserId',res.data.data.userId)
           }
@@ -205,6 +160,12 @@ export default {
         });
     },
     changeStatus() {
+      // 初始化表单数据
+      this.form.title = this.userObj.nickname || '';
+      this.form.school = this.userObj.school || '';
+      this.form.sex = this.userObj.sex === 1 ? '男' : '女';
+      this.form.signature = this.userObj.signature || '';
+      this.imageUrl = '';
       this.display = true;
     },
     submitForm() {
@@ -248,7 +209,7 @@ export default {
       // console.log(formData.get(0));
       // that.$axios
       //   .post(
-      //     'http://localhost:8081/upload/images', //请求后端的url
+      //     'http://38617112yi.zicp.vip/upload/images', //请求后端的url
       //     formData,
       //     config
       //   )
@@ -277,7 +238,7 @@ export default {
           userId: that.userObj.userId,
           avatar: that.img1,
         }
-        let url = 'http://localhost:8081/update/userInfo'
+        let url = 'http://38617112yi.zicp.vip/update/userInfo'
         that.$axios
           .post(url ,user, {
             headers: { "Content-Type": "application/json;charset=utf-8" ,
@@ -310,112 +271,282 @@ export default {
 <style lang="scss" scoped>
 .content {
   width: 950px;
-  height: 500px;
+  min-height: 500px;
   background: #fff;
-  border-radius: 4px;
-  .info {
-    width: 100%;
-    height: 70px;
-    line-height: 70px;
-    text-align: left;
-    padding-left: 30px;
-    font-size: 16px;
-    &:before {
-      content: "";
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #409eff;
-      margin-right: 10px;
-      margin-bottom: 2px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 30px;
+  margin-left: 20px;
+  margin-top: 20px;
+  
+  .info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ebeef5;
+    
+    .info-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #303133;
+      margin: 0;
+      position: relative;
+      padding-left: 16px;
+      
+      &:before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 20px;
+        background: linear-gradient(135deg, #113056 0%, #91CFD5 100%);
+        border-radius: 2px;
+      }
+    }
+    
+    .edit-btn {
+      color: #113056;
+      border-color: #113056;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background: rgba(17, 48, 86, 0.05);
+        transform: translateY(-1px);
+      }
+    }
+  }
+  
+  // 查看模式样式
+  .view-mode {
+    .user-profile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      
+      .avatar-section {
+        text-align: center;
+        margin-bottom: 30px;
+        
+        .user-avatar {
+          border: 3px solid #f0f0f0;
+          margin-bottom: 16px;
+          transition: transform 0.3s ease;
+          
+          &:hover {
+            transform: scale(1.05);
+          }
+        }
+        
+        .user-nickname {
+          font-size: 20px;
+          font-weight: 600;
+          color: #113056;
+          margin: 0 0 8px 0;
+        }
+        
+        .user-signature {
+          font-size: 14px;
+          color: #909399;
+          margin: 0;
+          max-width: 400px;
+          line-height: 1.4;
+        }
+      }
+      
+      .info-grid {
+        width: 100%;
+        max-width: 600px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+        
+        .info-item {
+          background: #f7f8f9;
+          border-radius: 8px;
+          padding: 20px;
+          transition: all 0.3s ease;
+          
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          }
+          
+          .info-label {
+            display: block;
+            font-size: 14px;
+            color: #909399;
+            margin-bottom: 8px;
+          }
+          
+          .info-value {
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            color: #303133;
+          }
+        }
+      }
+    }
+  }
+  
+  // 编辑模式样式
+  .edit-mode {
+    .edit-form {
+      max-width: 600px;
+      margin: 0 auto;
+      
+      .avatar-uploader {
+        margin-bottom: 20px;
+        
+        .el-upload {
+          border: 1px dashed #dcdfe6;
+          border-radius: 50%;
+          width: 100px;
+          height: 100px;
+          cursor: pointer;
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s ease;
+          
+          &:hover {
+            border-color: #91CFD5;
+            transform: scale(1.05);
+          }
+        }
+        
+        .avatar-uploader-icon {
+          font-size: 32px;
+          color: #c0c4cc;
+          width: 100px;
+          height: 100px;
+          line-height: 100px;
+          text-align: center;
+        }
+        
+        .avatar {
+          width: 100px;
+          height: 100px;
+          display: block;
+          border-radius: 50%;
+        }
+      }
+      
+      .custom-input {
+        width: 100%;
+        height: 44px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        
+        &:focus {
+          border-color: #91CFD5;
+          box-shadow: 0 0 0 2px rgba(145, 207, 213, 0.2);
+        }
+      }
+      
+      .custom-textarea {
+        width: 100%;
+        min-height: 100px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        
+        &:focus {
+          border-color: #91CFD5;
+          box-shadow: 0 0 0 2px rgba(145, 207, 213, 0.2);
+        }
+      }
+      
+      .sex-radio-group {
+        display: flex;
+        gap: 20px;
+        
+        .el-radio {
+          font-size: 14px;
+          
+          .el-radio__label {
+            padding-left: 8px;
+          }
+        }
+      }
+      
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #ebeef5;
+        
+        .cancel-btn {
+          padding: 10px 20px;
+          border-radius: 6px;
+          transition: all 0.3s ease;
+          
+          &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+        }
+        
+        .submit-btn {
+          padding: 10px 20px;
+          border-radius: 6px;
+          background: linear-gradient(135deg, #113056 0%, #91CFD5 100%);
+          border: none;
+          transition: all 0.3s ease;
+          
+          &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(17, 48, 86, 0.4);
+          }
+        }
+      }
     }
   }
 }
-.el-input {
-  position: relative;
-  font-size: 14px;
-  display: inline-block;
-  width: 90%;
-  height: 40px;
-  line-height: 40px;
+
+// 表单样式覆盖
+::v-deep .el-form-item {
+  margin-bottom: 20px;
+  
+  &__label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #606266;
+  }
 }
 
-.el-form-item__label {
-  text-align: right;
-  vertical-align: middle;
-  float: left;
-  font-size: 14px;
-  color: #606266;
-  line-height: 40px;
-  padding: 0 12px 0 0;
-  box-sizing: border-box;
-  width: 120px;
+// 按钮样式覆盖
+::v-deep .el-button {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
 }
-.avatar-uploader {
-  // margin-left: -100px;
-  padding-left: -200px;
-}
-.avatar-uploader .el-upload {
-  border: 1px dashed #d9d9d9;
-  border-radius: 50%;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.avatar-uploader .el-upload:hover {
-  border-color: #409eff;
-}
-.avatar-uploader-icon {
-  font-size: 24px;
-  color: #8c939d;
-  width: 50px;
-  height: 50px;
-  line-height: 50px;
-  text-align: center;
-  border-radius: 4px;
-  border: 1px #eee dotted;
-  //   text-align: left;
-}
-.avatar {
-  width: 50px;
-  height: 50px;
-  display: block;
-}
-.el-form-item--mini.el-form-item,
-.el-form-item--small.el-form-item {
-  margin-bottom: 15px;
-}
-.el-form-item__label {
-  width: 80px !important;
-  font-weight: 500px;
-  font-size: 12px;
-}
-el-date-editor,
-.el-date-editor--date {
-  width: 90% !important;
-}
-.el-input--small {
-  width: 90% !important;
-}
-.el-input__inner {
-  -webkit-appearance: none;
-  background-color: #fff;
-  background-image: none;
-  border-radius: 4px;
-  border: 1px solid #dcdfe6;
-  box-sizing: border-box;
-  color: #606266;
-  display: inline-block;
-  font-size: 11px;
-  height: 40px;
-  line-height: 40px;
-  outline: 0;
-  padding: 0 15px;
-  transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
-  width: 100%;
-}
-::v-deep .el-form-item--small.el-form-item[data-v-087e46ba] {
-  margin-bottom: 17px !important;
+
+::v-deep .el-button--primary {
+  background: linear-gradient(135deg, #113056 0%, #91CFD5 100%);
+  border: none;
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(17, 48, 86, 0.4);
+  }
+  
+  &.is-plain {
+    background: #fff;
+    color: #113056;
+    border-color: #113056;
+    
+    &:hover {
+      background: rgba(17, 48, 86, 0.05);
+    }
+  }
 }
 </style>

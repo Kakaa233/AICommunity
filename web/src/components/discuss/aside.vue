@@ -103,50 +103,95 @@ export default {
 <style lang="scss" scoped>
 #aside {
   width: 250px;
-  height: 500px;
-  border-right: 1px solid rgb(189, 187, 187);
+  min-height: 500px;
+  border-right: 1px solid #ebeef5;
   box-sizing: border-box;
+  background: #fff;
+  border-radius: 12px 0 0 12px;
+
   .aside {
     position: relative;
+
     h4 {
       font-size: 16px;
       position: absolute;
       left: 25px;
       top: 15px;
-      font-weight: 500;
-      color: rgb(83, 82, 82);
+      font-weight: 600;
+      color: #409EFF;
       z-index: 999;
+      padding-bottom: 8px;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 30px;
+        height: 3px;
+        background: linear-gradient(135deg, #409EFF, #66b1ff);
+        border-radius: 2px;
+      }
     }
 
     ul {
-      padding-top: 55px;
+      padding-top: 60px;
+
       li {
         height: 55px;
         font-size: 14px;
         text-align: left;
         line-height: 55px;
         padding-left: 25px;
-        ::v-deep .el-menu-item.is-active {
-          border-right: 2px solid #409eff !important;
-          background: #f0faff;
-          color: #2d8cf0;
+        transition: all 0.3s;
+        position: relative;
+
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 3px;
+          height: 0;
+          background: linear-gradient(135deg, #409EFF, #66b1ff);
+          border-radius: 2px;
+          transition: height 0.3s;
         }
+
         ::v-deep .el-menu-item.is-active {
-          border-right: 2px solid #409eff !important;
-          background: #f0faff !important;
-          color: #2d8cf0 !important;
+          border-right: none !important;
+          background: linear-gradient(90deg, rgba(64, 158, 255, 0.1) 0%, transparent 100%);
+          color: #409EFF;
+          font-weight: 500;
+
+          &::before {
+            height: 24px;
+          }
         }
+
         ::v-deep .el-menu.el-menu--horizontal {
           border-bottom: 0;
         }
+
         i {
           margin-right: 15px;
-          font-size: 20px;
+          font-size: 18px;
+          transition: transform 0.3s;
         }
+
         &:hover {
-          color: #2d8cf0;
-          background: #f0faff;
-          border-right: 2px solid #2d8cf0 !important;
+          color: #409EFF;
+          background: linear-gradient(90deg, rgba(64, 158, 255, 0.05) 0%, transparent 100%);
+          border-right: none !important;
+
+          &::before {
+            height: 24px;
+          }
+
+          i {
+            transform: scale(1.1);
+          }
         }
       }
     }

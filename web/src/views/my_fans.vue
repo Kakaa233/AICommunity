@@ -1,9 +1,6 @@
 <template>
   <div class="fans">
     <el-container>
-      <el-header style="padding: 0; height: 80px">
-        <Header></Header>
-      </el-header>
       <el-container>
         <el-aside width="252px" style="margin-left: 40px; margin-top: 20px">
           <Aside></Aside
@@ -14,12 +11,12 @@
   </div>
 </template>
 <script>
-import Header from "../components/banner.vue";
+
 import Aside from "../components/personal/aside.vue";
 import Main from "../components/fansContent.vue";
 export default {
   name: "fans",
-  components: { Header, Aside, Main },
+  components: { Aside, Main },
 };
 </script>
 <style lang="scss" scoped>

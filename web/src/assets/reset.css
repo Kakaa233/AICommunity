@@ -1,17 +1,61 @@
 
+:root {
+    --primary-color: #409EFF;
+    --success-color: #67C23A;
+    --warning-color: #E6A23C;
+    --danger-color: #F56C6C;
+    --info-color: #909399;
+    --text-primary: #303133;
+    --text-regular: #606266;
+    --text-secondary: #909399;
+    --text-placeholder: #C0C4CC;
+    --border-color: #DCDFE6;
+    --bg-color: #F5F7FA;
+    --card-bg: #FFFFFF;
+    --shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-    font-size: 12px;
-    line-height: 1.5;
-    font-family: "微软雅黑";
-    color: #666;
+    font-size: 14px;
+    line-height: 1.6;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: var(--text-regular);
+    background-color: var(--bg-color);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
-body,div,p,ul,li,ol,img,h3,h4{
-    margin:0;
-    padding:0;
+
+a {
+    text-decoration: none;
+    color: var(--primary-color);
+    transition: color 0.3s;
 }
-a{
-	text-decoration: none;
+
+a:hover {
+    color: #66b1ff;
 }
-ul,li,ol{
-	list-style:none;
+
+ul, li, ol {
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+    vertical-align: middle;
+}
+
+button {
+    cursor: pointer;
+}
+
+.clearfix::after {
+    content: "";
+    display: block;
+    clear: both;
 }

@@ -34,3 +34,5 @@ build/
 
 ### 不统计vue
 *.VUE linguist-detectable=false
+
+/web/node_modules

@@ -1,24 +1,25 @@
 <template>
-  <div class="chat-box">
-    <header>与{{userId}}聊天</header>
-    <div class="msg-box" ref="msg-box">
-      <div
-        v-for="(i,index) in list"
-        :key="index"
-        class="msg"
-        
-      >
-        <!-- <div class="user-head">
-          <img :src="i.avatar" height="30" width="30" :title="i.username">
-        </div> -->
-        <div class="user-msg">
-          <span :style="i.toId == userId?' float: right;':''" :class="i.toId == userId?'right':'left'">{{i.messageContent}}</span>
+  <div class="chat-container">
+    <div class="chat-header">
+      <h2>与{{userId}}聊天</h2>
+    </div>
+    <div class="chat-body">
+      <div class="msg-box" ref="msg-box">
+        <div
+          v-for="(i,index) in list"
+          :key="index"
+          class="msg"
+        >
+          <div class="user-msg">
+            <span :class="i.toId == userId?'msg-right':'msg-left'">{{i.messageContent}}</span>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="input-box">
-      <input type="text" ref="sendMsg" v-model="contentText" @keyup.enter="sendText()" />
-      <div class="btn" :class="{['btn-active']:contentText}" @click="sendText()">发送</div>
+      <!-- 半常驻输入区域 -->
+      <div class="input-box">
+        <input type="text" ref="sendMsg" v-model="contentText" @keyup.enter="sendText()" placeholder="输入消息..." />
+        <div class="btn" :class="{['btn-active']:contentText}" @click="sendText()">发送</div>
+      </div>
     </div>
   </div>
 </template>
@@ -116,135 +117,145 @@
 </script>
 
 <style lang="scss" scoped>
-  .chat-box {
-    margin: 0 auto;
-    background: #fafafa;
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    max-width: 700px;
-  header {
-    position: fixed;
-    width: 100%;
-    height: 3rem;
-    background: #409eff;
-    max-width: 700px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    color: white;
-    font-size: 1rem;
+.chat-container {
+  width: 1278px;
+  min-height: 610px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 0 auto;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.chat-header {
+  background: #113056;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px 8px 0 0;
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
   }
-  .msg-box {
-    position: absolute;
-    height: calc(100% - 6.5rem);
-    width: 100%;
-    margin-top: 3rem;
-    overflow-y: scroll;
+}
+
+.chat-body {
+  background: #fff;
+  border-radius: 0 0 8px 8px;
+  display: flex;
+  flex-direction: column;
+  min-height: 500px;
+}
+
+.msg-box {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
   .msg {
-    width: 95%;
-    min-height: 2.5rem;
-    margin: 1rem 0.5rem;
-    position: relative;
+    margin-bottom: 15px;
     display: flex;
-    justify-content: flex-start !important;
-  .user-head {
-    min-width: 2.5rem;
-    width: 20%;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-    background: #f1f1f1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  .head {
-    width: 1.2rem;
-    height: 1.2rem;
-  }
-  // position: absolute;
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
   .user-msg {
-    width: 80%;
-  // position: absolute;
+    max-width: 70%;
     word-break: break-all;
-    position: relative;
-    z-index: 5;
-  span {
-    display: inline-block;
-    padding: 0.5rem 0.7rem;
-    border-radius: 0.5rem;
-    margin-top: 0.2rem;
-    font-size: 0.88rem;
-  }
-  .left {
-    background: white;
-    animation: toLeft 0.5s ease both 1;
-  }
-  .right {
-    background: #53a8ff;
-    color: white;
-    animation: toright 0.5s ease both 1;
-  }
-  @keyframes toLeft {
-    0% {
-      opacity: 0;
-      transform: translateX(-10px);
+    .msg-left {
+      background: #f5f7fa;
+      color: #333;
+      border-radius: 18px 18px 18px 4px;
+      align-self: flex-start;
     }
-    100% {
-      opacity: 1;
-      transform: translateX(0px);
+    .msg-right {
+      background: #113056;
+      color: white;
+      border-radius: 18px 18px 4px 18px;
+      align-self: flex-end;
+    }
+    span {
+      display: inline-block;
+      padding: 10px 16px;
+      font-size: 14px;
+      animation: messageSlide 0.3s ease-out;
     }
   }
-  @keyframes toright {
-    0% {
-      opacity: 0;
-      transform: translateX(10px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(0px);
-    }
-  }
-  }
-  }
-  }
-  .input-box {
-    padding: 0 0.5rem;
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 3.5rem;
-    background: #fafafa;
-    box-shadow: 0 0 5px #ccc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+}
+
+// 半常驻输入区域
+.input-box {
+  padding: 15px 20px;
+  border-top: 1px solid #eee;
+  background: #fff;
+  border-radius: 0 0 8px 8px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
   input {
-    height: 2.3rem;
-    display: inline-block;
-    width: 100%;
-    padding: 0.5rem;
-    border: none;
-    border-radius: 0.2rem;
-    font-size: 0.88rem;
+    flex: 1;
+    height: 40px;
+    padding: 0 15px;
+    border: 1px solid #dcdfe6;
+    border-radius: 20px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s;
+    &:focus {
+      border-color: #91CFD5;
+    }
   }
   .btn {
-    height: 2.3rem;
-    min-width: 4rem;
+    height: 40px;
+    min-width: 80px;
     background: #e0e0e0;
-    padding: 0.5rem;
-    font-size: 0.88rem;
-    color: white;
-    text-align: center;
-    border-radius: 0.2rem;
-    margin-left: 0.5rem;
-    transition: 0.5s;
+    color: #606266;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    margin-left: 10px;
+    cursor: not-allowed;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .btn-active {
-    background: #409eff;
+    background: #113056;
+    color: white;
+    cursor: pointer;
+    &:hover {
+      background: #1a467a;
+    }
   }
+}
+
+// 消息动画
+@keyframes messageSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
+
+// 滚动条样式
+.msg-box::-webkit-scrollbar {
+  width: 6px;
+}
+
+.msg-box::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.msg-box::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+  &:hover {
+    background: #a8a8a8;
+  }
+}
 </style>

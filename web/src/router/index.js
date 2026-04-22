@@ -12,12 +12,13 @@ const routes = [
     {
         path: '/index',
         name: 'index',
-        component: () => import('@/views/index')
+        component: () => import('@/views/index'),
+        meta: { discuss: true }
     },
     {
         path: '/login',
         name: 'login',
-        component: () => import('@/views/login')
+        component: () => import('@/views/auth')
     },
     {
         path: '/chat',
@@ -25,10 +26,14 @@ const routes = [
         component: () => import('@/views/chat')
     },
     {
-
+        path: '/loginPass',
+        name: 'loginPass',
+        component: () => import('@/views/loginPass')
+    },
+    {
         path: '/register',
         name: 'register',
-        component: () => import('@/views/register')
+        component: () => import('@/views/auth')
     },
     {
         path: '/writeArticle',
@@ -37,32 +42,39 @@ const routes = [
     }, {
         path: '/JobDiscuss',
         name: 'JobDiscuss',
-        component: () => import('@/views/JobDiscuss')
+        component: () => import('@/views/JobDiscuss'),
+        meta: { discuss: true }
     }, {
         path: '/study_day',
         name: 'study_day',
-        component: () => import('@/views/study_day')
+        component: () => import('@/views/study_day'),
+        meta: { discuss: true }
     }
     , {
         path: '/find',
         name: 'find',
-        component: () => import('@/views/find')
+        component: () => import('@/views/find'),
+        meta: { discuss: true }
     }, {
         path: '/put_together',
         name: 'put_together',
-        component: () => import('@/views/put_together')
+        component: () => import('@/views/put_together'),
+        meta: { discuss: true }
     }, {
         path: '/wall',
         name: 'wall',
-        component: () => import('@/views/wall')
+        component: () => import('@/views/wall'),
+        meta: { discuss: true }
     }, {
         path: '/life_intersting',
         name: 'life_intersting',
-        component: () => import('@/views/life_intersting')
+        component: () => import('@/views/life_intersting'),
+        meta: { discuss: true }
     }, {
         path: '/other',
         name: 'other',
-        component: () => import('@/views/other')
+        component: () => import('@/views/other'),
+        meta: { discuss: true }
     }, {
         path: '/checkout',
         name: 'checkout',
