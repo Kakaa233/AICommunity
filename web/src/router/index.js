@@ -18,7 +18,7 @@ const routes = [
     {
         path: '/login',
         name: 'login',
-        component: () => import('@/views/auth')
+        component: () => import('@/views/login')
     },
     {
         path: '/chat',
@@ -26,14 +26,9 @@ const routes = [
         component: () => import('@/views/chat')
     },
     {
-        path: '/loginPass',
-        name: 'loginPass',
-        component: () => import('@/views/loginPass')
-    },
-    {
         path: '/register',
         name: 'register',
-        component: () => import('@/views/auth')
+        component: () => import('@/views/register')
     },
     {
         path: '/writeArticle',

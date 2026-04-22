@@ -10,20 +10,6 @@
       </div>
       <div class="right-section">
         <h3>创建账号</h3>
-        <div class="third-party">
-          <span>选择已有方式或电子邮箱注册</span>
-          <div class="icons">
-            <a href="http://38617112yi.zicp.vip/oauth/login" class="icon">
-              <i class="el-icon-mobile-phone"></i>
-            </a>
-            <a href="http://38617112yi.zicp.vip/oauth/qq" class="icon">
-              <i class="el-icon-chat-dot-square"></i>
-            </a>
-            <div class="icon">
-              <i class="el-icon-message"></i>
-            </div>
-          </div>
-        </div>
         <el-form
           :model="registerInfo"
           status-icon
@@ -31,28 +17,20 @@
           ref="ruleForm"
           class="register-form"
         >
-          <el-form-item prop="phoneNumber">
+          <el-form-item prop="userId">
             <el-input
-              v-model="registerInfo.phoneNumber"
+              v-model="registerInfo.userId"
               autocomplete="off"
-              placeholder="Name"
+              placeholder="账号名"
               class="custom-input"
             ></el-input>
           </el-form-item>
-          <el-form-item prop="checkPass">
-            <el-input
-              v-model="registerInfo.checkPass"
-              autocomplete="off"
-              placeholder="Email"
-              class="custom-input"
-            ></el-input>
-          </el-form-item>
-          <el-form-item prop="passWord">
+          <el-form-item prop="password">
             <el-input
               type="password"
-              v-model="registerInfo.passWord"
+              v-model="registerInfo.password"
               autocomplete="off"
-              placeholder="Password"
+              placeholder="密码"
               class="custom-input"
             ></el-input>
           </el-form-item>
@@ -62,9 +40,6 @@
               @click="submitForm('ruleForm')"
               class="sign-up-btn"
               >SIGN UP</el-button
-            >
-            <el-button type="primary" class="get-code-btn"
-              @click="getCheckPass()">获取验证码</el-button
             >
           </div>
         </el-form>
@@ -80,13 +55,12 @@ export default {
   data() {
     return {
       registerInfo: {
-        phoneNumber: "",
-        passWord: "",
-        checkPass: "",
+        userId: "",
+        password: "",
       },
       rules: {
-        phoneNumber: [
-          { required: true, message: "请输入账号", trigger: "blur" },
+        userId: [
+          { required: true, message: "请输入账号名", trigger: "blur" },
           {
             validator: function (rule, value, callback) {
               var MobileRegex = /^[a-zA-Z0-9_]{5,20}$/;
@@ -99,20 +73,7 @@ export default {
             trigger: "blur",
           },
         ],
-        checkPass: [
-          { required: true, message: "请输入验证码", trigger: "blur" },
-          {
-            validator: function (rule, value, callback) {
-              if (!/^[0-9]{6}$/.test(value)) {
-                callback(new Error("验证码必须是六位数字"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-        passWord: [
+        password: [
           { required: true, message: "请输入密码", trigger: "blur" },
           {
             validator: function (rule, value, callback) {
@@ -133,40 +94,16 @@ export default {
     goLogin() {
       this.$router.push({ name: "login" });
     },
-    getCheckPass() {
-      var _self = this;
-      var url = "http://38617112yi.zicp.vip/register/sendSMSCode";
-      var userId = _self.registerInfo.phoneNumber;
-      _self.$axios
-        .get(url, {
-          params: { userId: userId },
-        })
-        .then((res) => {
-          console.log(res.data);
-          if (res.status == 200) {
-            if (res.data.code == 0) {
-              _self.$message.success("验证码已发送到您的手机，请您注意查收~");
-              // _self.check = res.data.message;
-              // console.log(_self.check);
-            }
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
     submitForm(formName) {
       const _self = this;
-      const userId = _self.registerInfo.phoneNumber;
-      const password = _self.registerInfo.passWord;
-      const code = _self.registerInfo.checkPass;
+      const userId = _self.registerInfo.userId;
+      const password = _self.registerInfo.password;
       const url = "http://38617112yi.zicp.vip/register/verifyRegisterInfo";
       this.$refs[formName].validate((valid) => {
         if (valid) {
           _self.$axios
             .get(url, {
-              //将对象 序列化成URL的形式，以&进行拼接
-              params: { userId: userId, password: password, code: code },
+              params: { userId: userId, password: password },
             })
             .then((res) => {
               console.log(res);

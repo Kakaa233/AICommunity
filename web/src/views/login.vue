@@ -10,20 +10,6 @@
       </div>
       <div class="right-section">
         <h3>登入账号</h3>
-        <div class="third-party">
-          <span>选择登录方式或电子邮箱登录</span>
-          <div class="icons">
-            <a href="http://38617112yi.zicp.vip/oauth/login" class="icon">
-              <i class="el-icon-mobile-phone"></i>
-            </a>
-            <a href="http://38617112yi.zicp.vip/oauth/qq" class="icon">
-              <i class="el-icon-chat-dot-square"></i>
-            </a>
-            <div class="icon">
-              <i class="el-icon-message"></i>
-            </div>
-          </div>
-        </div>
         <el-form
           :model="loginInfo"
           status-icon
@@ -31,19 +17,20 @@
           ref="ruleForm"
           class="login-form"
         >
-          <el-form-item prop="phoneNumber">
+          <el-form-item prop="userId">
             <el-input
-              v-model="loginInfo.phoneNumber"
+              v-model="loginInfo.userId"
               autocomplete="off"
-              placeholder="手机号"
+              placeholder="账号名"
               class="custom-input"
             ></el-input>
           </el-form-item>
-          <el-form-item prop="checkPass">
+          <el-form-item prop="password">
             <el-input
-              v-model="loginInfo.checkPass"
+              type="password"
+              v-model="loginInfo.password"
               autocomplete="off"
-              placeholder="验证码"
+              placeholder="密码"
               class="custom-input"
             ></el-input>
           </el-form-item>
@@ -54,9 +41,6 @@
               @click="submitForm('ruleForm')"
               class="sign-in-btn"
               >SIGN IN</el-button
-            >
-            <el-button type="primary" class="get-code-btn"
-              @click="getCheckPass()">获取验证码</el-button
             >
           </div>
         </el-form>
@@ -72,16 +56,16 @@ export default {
   data() {
     return {
       loginInfo: {
-        phoneNumber: "",
-        checkPass: "",
+        userId: "",
+        password: "",
       },
       rules: {
-        phoneNumber: [
-          { required: true, message: "请输入账号", trigger: "blur" },
+        userId: [
+          { required: true, message: "请输入账号名字", trigger: "blur" },
           {
             validator: function (rule, value, callback) {
-              var MobileRegex = /^[a-zA-Z0-9_]{5,20}$/;
-              if (!MobileRegex.test(value) || /^\d+$/.test(value)) {
+              var Regex = /^[a-zA-Z0-9_]{5,20}$/;
+              if (!Regex.test(value) || /^\d+$/.test(value)) {
                 callback(new Error("5-20个字母数字下划线，且不能是纯数字"));
               } else {
                 callback();
@@ -90,12 +74,13 @@ export default {
             trigger: "blur",
           },
         ],
-        checkPass: [
-          { required: true, message: "请输入验证码", trigger: "blur" },
+        password: [
+          { required: true, message: "请输入密码", trigger: "blur" },
           {
             validator: function (rule, value, callback) {
-              if (!/^[0-9]{6}$/.test(value)) {
-                callback(new Error("验证码必须是六位数字"));
+              var res = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/;
+              if (!res.test(value)) {
+                callback(new Error("8-20个字符，至少一个字母和一个数字"));
               } else {
                 callback();
               }
@@ -110,48 +95,20 @@ export default {
     goIndex() {
       this.$router.push({ name: "index" });
     },
-    goLoginPass() {
-      this.$router.push({ name: "loginPass" });
-    },
     goRegister() {
       this.$router.push({ name: "register" });
-    },
-    getCheckPass() {
-      var _self = this;
-      var url = "http://38617112yi.zicp.vip/login/sendSMSCode";
-      var userId = _self.loginInfo.phoneNumber;
-      _self.$message.success("验证码已发送到您的手机，请您注意查收~");
-      _self.$axios
-        .get(url, {
-          params: { 
-            userId: userId,
-          },
-          withCredentials:true
-        })
-        .then((res) => {
-          console.log(res.data);
-          if (res.status == 200) {
-            if (res.data.code == 0) {
-              //_self.$message.success("验证码已发送到您的手机，请您注意查收~");
-            }
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
     },
     submitForm(formName) {
       console.log(11111);
       const _self = this;
-      const userId = _self.loginInfo.phoneNumber;
-      const code = _self.loginInfo.checkPass;
+      const userId = _self.loginInfo.userId;
+      const password = _self.loginInfo.password;
       const url = "http://38617112yi.zicp.vip/login/verifyLoginInfo";
       this.$refs[formName].validate((valid) => {
         if (valid) {
           _self.$axios
             .get(url, {
-              //将对象 序列化成URL的形式，以&进行拼接
-              params: { userId: userId, code: code },
+              params: { userId: userId, password: password },
             })
             .then((res) => {
               console.log(res);
