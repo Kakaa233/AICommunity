@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 set "REDIS_EXE=F:\应用\软件\Redis-8.6.2-Windows-x64-cygwin-with-Service\Redis-8.6.2-Windows-x64-cygwin-with-Service\redis-server.exe"
 
 if not exist "%REDIS_EXE%" (

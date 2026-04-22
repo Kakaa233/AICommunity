@@ -49,6 +49,7 @@
                 autocomplete="off"
                 placeholder="密码"
                 class="custom-input"
+                show-password
               ></el-input>
             </el-form-item>
             <div class="form-footer">
@@ -88,6 +89,7 @@
                 autocomplete="off"
                 placeholder="密码"
                 class="custom-input"
+                show-password
               ></el-input>
             </el-form-item>
             <div class="form-footer">
@@ -141,7 +143,7 @@ export default {
             validator: function (rule, value, callback) {
               var res = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/;
               if (!res.test(value)) {
-                callback(new Error("8-20个字符，至少一个字母和一个数字"));
+                callback(new Error("需8-20个字符，至少含1个字母和1个数字"));
               } else {
                 callback();
               }
@@ -171,7 +173,7 @@ export default {
             validator: function (rule, value, callback) {
               var res = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/;
               if (!res.test(value)) {
-                callback(new Error("8-20个字符，至少一个字母和一个数字"));
+                callback(new Error("需8-20个字符，至少含1个字母和1个数字"));
               } else {
                 callback();
               }
@@ -215,11 +217,19 @@ export default {
                     localStorage.setItem("user", userId);
                   }, 500);
                 } else if (res.data.code == 100000) {
-                  _self.$message.success(res.data.msg);
+                  _self.$message.error(res.data.msg || "登录失败，账号不存在");
                 } else if (res.data.code == 100002) {
-                  _self.$message.success(res.data.msg);
+                  _self.$message.error(res.data.msg || "登录失败，密码错误");
+                } else {
+                  _self.$message.error(res.data.msg || "登录失败，请检查账号和密码");
                 }
+              } else {
+                _self.$message.error("网络异常，请稍后再试");
               }
+            })
+            .catch((err) => {
+              console.log(err);
+              _self.$message.error("登录失败，服务器发生异常");
             });
         } else {
           console.log("error submit!!");
@@ -246,11 +256,19 @@ export default {
                     _self.switchTab('login');
                   }, 500);
                 } else if (res.data.code == 100000) {
-                  _self.$message.success(res.data.msg);
+                  _self.$message.error(res.data.msg || "注册失败，账号可能已被占用");
                 } else if (res.data.code == 100001) {
-                  _self.$message.success(res.data.msg);
+                  _self.$message.error(res.data.msg || "注册失败，输入数据不合法");
+                } else {
+                  _self.$message.error(res.data.msg || "注册失败，请检查填写信息");
                 }
+              } else {
+                _self.$message.error("网络异常，请稍后再试");
               }
+            })
+            .catch((err) => {
+              console.log(err);
+              _self.$message.error("注册失败，服务器发生异常");
             });
         } else {
           console.log("error submit!!");
@@ -595,7 +613,20 @@ export default {
 }
 
 ::v-deep .el-form-item {
-  margin-bottom: 0;
+  margin-bottom: 24px;
+}
+
+::v-deep .el-form-item__error {
+  color: #f56c6c;
+  font-size: 12px;
+  line-height: 1.4;
+  padding-top: 4px;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  font-weight: 500;
+  width: 100%;
+  text-align: left;
 }
 
 ::v-deep .el-button--primary {
@@ -604,6 +635,5 @@ export default {
 
 .custom-input {
   width: 100%;
-  margin-bottom: 20px;
 }
 </style>
