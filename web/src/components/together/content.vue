@@ -35,7 +35,7 @@ export default {
   methods: {
     getData() {
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/category/";
+      var url = "/apis/category/";
       var categoryId = this.id;
       _self.$axios
         .get(url + categoryId, { params: { categoryId: categoryId } })

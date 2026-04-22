@@ -31,7 +31,7 @@ export default {
     getRanking() {
       var _self = this;
       var articleId = parseInt(_self.artId);
-      var url = "http://38617112yi.zicp.vip/TopAchieve";
+      var url = "/apis/TopAchieve";
 
       _self.$axios
         .get(url, { params: { articleId: articleId } })

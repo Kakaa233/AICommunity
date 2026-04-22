@@ -228,7 +228,7 @@ export default {
     mode() {
       var reg = /<\/?.+?\/?>/g;
         // console.log(this.content.replace(reg, ""));
-        var url = "http://38617112yi.zicp.vip/article/edit";
+        var url = "/apis/article/edit";
         // var url = "/insert";
         var _self = this;
         let articleTitle = this.input;
@@ -274,7 +274,7 @@ export default {
       if (this.input && this.content) {
         var reg = /<\/?.+?\/?>/g;
         // console.log(this.content.replace(reg, ""));
-        var url = "http://38617112yi.zicp.vip/article/insert";
+        var url = "/apis/article/insert";
         // var url = "/insert";
         var _self = this;
         let articleTitle = this.input;

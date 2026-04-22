@@ -149,7 +149,7 @@ export default {
     nozan() {
       var _self = this;
       var articleId = parseInt(_self.artId);
-      var url = "http://38617112yi.zicp.vip/dislike";
+      var url = "/apis/dislike";
 
       _self.$axios
         .get(url, { params: { articleId: articleId } })
@@ -168,7 +168,7 @@ export default {
     zan() {
       var _self = this;
       var articleId = parseInt(_self.artId);
-      var url = "http://38617112yi.zicp.vip/like";
+      var url = "/apis/like";
 
       _self.$axios
         .get(url, { params: { articleId: articleId } })
@@ -190,7 +190,7 @@ export default {
     changeArt1() {
       var _self = this;
       var articleId = parseInt(_self.artId);
-      var url = "http://38617112yi.zicp.vip/article/can/edit";
+      var url = "/apis/article/can/edit";
 
       _self.$axios
         .get(url, { params: { articleId: articleId } })
@@ -218,7 +218,7 @@ export default {
     deleteArt() {
       var _self = this;
       var articleId = parseInt(_self.artId);
-      var url = "http://38617112yi.zicp.vip/article/delete";
+      var url = "/apis/article/delete";
 
       _self.$axios
         .get(url, { params: { articleId: articleId } })
@@ -237,7 +237,7 @@ export default {
     submitComment() {
       var _self = this;
       var articleId = parseInt(_self.artId);
-      var url = "http://38617112yi.zicp.vip/insert/comment";
+      var url = "/apis/insert/comment";
       let params = `articleId=${articleId}&content=${_self.textarea}`;
       _self.$axios
         .post(url, params, {
@@ -257,7 +257,7 @@ export default {
     },
     getData(id) {
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/detail/";
+      var url = "/apis/detail/";
       let articleId = id || _self.artId;
       
       console.log(articleId, "iddddd");
@@ -278,7 +278,7 @@ export default {
     },
     getComment() {
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/comment/list";
+      var url = "/apis/comment/list";
       var articleId = parseInt(_self.artId);
       _self.$axios
         .get(url, {
@@ -296,7 +296,7 @@ export default {
     },
     getHotPot() {
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/article/hotspot";
+      var url = "/apis/article/hotspot";
       _self.$axios
         .get(url)
         .then((res) => {

@@ -164,7 +164,7 @@ export default {
       const inputSearch = this.inputSearch;
       var _self = this;
       
-      var url = "http://38617112yi.zicp.vip/article/search";
+      var url = "/apis/article/search";
 
       _self.$axios
         .get(url, { params: { keyword: inputSearch } })

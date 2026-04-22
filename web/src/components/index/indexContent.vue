@@ -235,7 +235,7 @@ export default {
     isRed() {
       //console.log(777)
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/hasReadNotice";
+      var url = "/apis/hasReadNotice";
       _self.$axios
         .get(url)
         .then((res) => {
@@ -250,7 +250,7 @@ export default {
     },
     guanzhuList() {
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/follow/list";
+      var url = "/apis/follow/list";
       //var categoryId = this.id;
 
       _self.$axios
@@ -274,7 +274,7 @@ export default {
       this.display = !this.display;
       //console.log(userId);
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/add/follow";
+      var url = "/apis/add/follow";
       //var categoryId = this.id;
 
       _self.$axios
@@ -298,7 +298,7 @@ export default {
       this.display = !this.display;
       //console.log(userId);
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/cancel/follow";
+      var url = "/apis/cancel/follow";
       //var categoryId = this.id;
 
       _self.$axios
@@ -320,7 +320,7 @@ export default {
     },
     getData() {
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/category/";
+      var url = "/apis/category/";
       var categoryId = this.id;
       // console.log(categoryId, "ipppppppppppp");
       _self.$axios

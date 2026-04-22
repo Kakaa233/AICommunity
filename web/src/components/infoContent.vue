@@ -85,7 +85,7 @@ export default {
   methods: {
     newLikes() {
       var _self = this;
-      var url = "http://38617112yi.zicp.vip/notice/list";
+      var url = "/apis/notice/list";
       _self.$axios
         .get(url)
         .then((res) => {

@@ -2,12 +2,12 @@ module.exports = {
     devServer: {
       proxy: { //配置自动启动浏览器
               "/apis": {
-                  target: "http://38617112yi.zicp.vip",
+                  target: "http://localhost:8081",
                   changeOrigin: true,
                   // ws: true,//websocket支持
                   //secure: false,
                   pathRewrite: {
-                      '^apis': '/'    //代理的路径
+                      '^/apis': ''    //代理的路径
                   },
                 //   onProxyRes(proxyRes, req, res) {
                 //       if(proxyRes.headers['set-cookie']) {

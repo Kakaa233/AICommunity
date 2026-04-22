@@ -200,13 +200,11 @@ export default {
       const _self = this;
       const userId = _self.loginInfo.userId;
       const password = _self.loginInfo.password;
-      const url = "http://38617112yi.zicp.vip/login/verifyLoginInfo";
+      const url = "/apis/login/loginPassword";
       this.$refs[formName].validate((valid) => {
         if (valid) {
           _self.$axios
-            .get(url, {
-              params: { userId: userId, password: password },
-            })
+            .post(url, _self.$qs.stringify({ userId: userId, password: password }))
             .then((res) => {
               console.log(res);
               if (res.status == 200) {
@@ -234,13 +232,11 @@ export default {
       const _self = this;
       const userId = _self.registerInfo.userId;
       const password = _self.registerInfo.password;
-      const url = "http://38617112yi.zicp.vip/register/verifyRegisterInfo";
+      const url = "/apis/register/verifyRegisterInfo";
       this.$refs[formName].validate((valid) => {
         if (valid) {
           _self.$axios
-            .get(url, {
-              params: { userId: userId, password: password },
-            })
+            .post(url, _self.$qs.stringify({ userId: userId, password: password }))
             .then((res) => {
               console.log(res);
               if (res.status == 200) {

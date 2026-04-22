@@ -108,7 +108,7 @@ export default {
       const _self = this;
       const userId = _self.loginInfo.phoneNumber;
       const password = _self.loginInfo.passWord;
-      const url = "http://38617112yi.zicp.vip/login/loginPassword";
+      const url = "/apis/login/loginPassword";
       this.$refs[formName].validate((valid) => {
         if (valid) {
           _self.$axios

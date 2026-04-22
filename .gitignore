@@ -36,3 +36,5 @@ build/
 *.VUE linguist-detectable=false
 
 /web/node_modules
+
+/.github/agents/
