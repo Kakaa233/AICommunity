@@ -26,22 +26,6 @@ export default {
       return !noBannerRoutes.includes(this.$route.name)
     }
   },
-  created() {
-    console.log('浏览器',navigator.userAgent)
-    let dev = String(navigator.userAgent)
-
-    if(dev.indexOf('Mozilla') > -1) {
-      this.$cookies.set(
-        "token",
-        "7c6d8601ba874dd7aa74d4bfc4d22b1c"
-      );
-    } else {
-      this.$cookies.set(
-      "token",
-      "6ec7c49f758a4296bf17b7410f2182cb"
-    );
-    }
-  },
   watch: {
     $route(to, from) {
       // 讨论区内部切换无动画

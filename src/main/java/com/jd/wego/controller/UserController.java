@@ -64,6 +64,9 @@ public class UserController {
     @ResponseBody
     public Result<User> userInfo(HttpServletRequest request) {
         User user = loginController.getUserInfo(request);
+        if (user == null) {
+            return Result.error(CodeMsg.NOT_LOGIN);
+        }
         String userId = user.getUserId();
 
         return Result.success(userService.selectByUserId(userId));

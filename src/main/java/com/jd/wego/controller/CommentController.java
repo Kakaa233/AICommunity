@@ -61,7 +61,7 @@ public class CommentController {
             = "articleId", required = false) Integer articleId, @RequestParam(value = "content", required = false) String content) {
         User user = loginController.getUserInfo(request);
         if (user == null) {
-            return Result.error(CodeMsg.ERROR);
+            return Result.error(CodeMsg.NOT_LOGIN);
         }
 
         // 为了方便前后端联调，先统一将user对象写死

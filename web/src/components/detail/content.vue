@@ -87,10 +87,11 @@
     <div class="comment-section">
       <h2 class="comment-title">评论区</h2>
       <div class="comment-list">
-        <div class="comment-item" v-for="(item, index) in commentList" :key="index">
-          <div class="comment-content">{{ item.commentContent }}</div>
+        <div class="comment-item" v-for="(item, index) in commentList" :key="item.commentId || index">
+          <div class="comment-user">{{ item._nickname || '匿名用户' }}</div>
+          <div class="comment-content">{{ item._commentContent }}</div>
           <div class="comment-meta">
-            <span class="comment-time">{{ item.commentCreatedTime }}</span>
+            <span class="comment-time">{{ item._commentCreatedTime }}</span>
           </div>
         </div>
         <div v-if="commentList.length === 0" class="no-comments">
@@ -143,8 +144,27 @@ export default {
     console.log(this.artId, "22222");
   },
   methods: {
+    formatDateTime(value) {
+      if (!value) {
+        return '';
+      }
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return String(value);
+      }
+      const pad = (n) => String(n).padStart(2, '0');
+      const y = date.getFullYear();
+      const m = pad(date.getMonth() + 1);
+      const d = pad(date.getDate());
+      const hh = pad(date.getHours());
+      const mm = pad(date.getMinutes());
+      const ss = pad(date.getSeconds());
+      return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+    },
     goHot(articleId) {
+      this.artId = articleId;
       this.getData(articleId);
+      this.getComment();
     },
     nozan() {
       var _self = this;
@@ -237,22 +257,39 @@ export default {
     submitComment() {
       var _self = this;
       var articleId = parseInt(_self.artId);
+      if (!articleId) {
+        this.$message.error('文章ID异常，请刷新后重试');
+        return;
+      }
+      if (!_self.textarea || !_self.textarea.trim()) {
+        this.$message.warning('评论内容不能为空');
+        return;
+      }
       var url = "/apis/insert/comment";
-      let params = `articleId=${articleId}&content=${_self.textarea}`;
+      let params = _self.$qs.stringify({
+        articleId,
+        content: _self.textarea.trim(),
+      });
       _self.$axios
         .post(url, params, {
           headers: {
             'content-type': 'application/x-www-form-urlencoded'
           }
         })
-        .then(() => {
-          this.dialogFormVisible = false;
-          this.textarea = '';
-          this.$message.success('评论成功');
-          this.getComment();
+        .then((res) => {
+          if (res.status === 200 && res.data && res.data.code === 0) {
+            this.dialogFormVisible = false;
+            this.textarea = '';
+            this.$message.success('评论成功');
+            this.getComment();
+            this.getData();
+          } else {
+            this.$message.error((res.data && res.data.msg) || '评论失败，请先登录');
+          }
         })
         .catch((err) => {
           console.log(err);
+          this.$message.error('评论提交失败，请稍后再试');
         });
     },
     getData(id) {
@@ -280,6 +317,10 @@ export default {
       var _self = this;
       var url = "/apis/comment/list";
       var articleId = parseInt(_self.artId);
+      if (!articleId) {
+        _self.commentList = [];
+        return;
+      }
       _self.$axios
         .get(url, {
           params: {
@@ -288,10 +329,26 @@ export default {
         })
         .then((res) => {
           console.log('评论区', res.data);
-          _self.commentList = res.data.data;
+          if (res.status === 200 && res.data && res.data.code === 0) {
+            const rawList = Array.isArray(res.data.data) ? res.data.data : [];
+            _self.commentList = rawList.map((item) => {
+              const content = item.commentContent || item.comment_content || item.content || '';
+              const createdTime = item.commentCreatedTime || item.comment_created_time || item.createdTime || item.createTime || '';
+              const nickname = item.nickname || item.userName || item.username || '';
+              return {
+                ...item,
+                _nickname: nickname,
+                _commentContent: content,
+                _commentCreatedTime: _self.formatDateTime(createdTime),
+              };
+            });
+          } else {
+            _self.commentList = [];
+          }
         })
         .catch((err) => {
           console.log(err);
+          _self.commentList = [];
         });
     },
     getHotPot() {
@@ -597,6 +654,14 @@ export default {
         
         &:first-child {
           padding-top: 0;
+        }
+
+        .comment-user {
+          text-align: left;
+          font-size: 14px;
+          color: #113056;
+          font-weight: 600;
+          margin-bottom: 8px;
         }
         
         .comment-content {

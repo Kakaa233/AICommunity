@@ -87,13 +87,7 @@ export default {
     }
   },
   mounted() {
-    var user = localStorage.getItem("user");
-    console.log(user, "111");
-    if (user) {
-      this.display = false;
-    } else {
-      this.display = true;
-    }
+    this.refreshLoginStatus();
   },
   created() {
     this.activeIndex = this.$route.query.url;
@@ -119,10 +113,44 @@ export default {
         })
         .catch(() => {});
     },
-    goReturn() {
-      this.$router.push({ name: "index" });
+    clearLocalLogin() {
+      localStorage.removeItem("user");
       localStorage.removeItem("password");
+      localStorage.removeItem("myuserId");
       this.display = true;
+    },
+    refreshLoginStatus() {
+      const _self = this;
+      _self.$axios
+        .get("/apis/userInfo")
+        .then((res) => {
+          if (
+            res.status === 200 &&
+            res.data &&
+            res.data.code === 0 &&
+            res.data.data &&
+            res.data.data.userId
+          ) {
+            localStorage.setItem("user", res.data.data.userId);
+            _self.display = false;
+          } else {
+            _self.clearLocalLogin();
+          }
+        })
+        .catch(() => {
+          _self.clearLocalLogin();
+        });
+    },
+    goReturn() {
+      const _self = this;
+      _self.$axios
+        .get("/apis/logout")
+        .catch(() => {})
+        .finally(() => {
+          _self.$cookies.remove("token");
+          _self.clearLocalLogin();
+          _self.$router.push({ name: "index" });
+        });
     },
     goPersonal() {
       // console.log(111);
