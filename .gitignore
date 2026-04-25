@@ -42,3 +42,16 @@ build/
 
 ### redis
 dump.rdb
+
+### AI 服务 (Python)
+/ai-service/.venv/
+/ai-service/__pycache__/
+/ai-service/**/__pycache__/
+/ai-service/.pytest_cache/
+/ai-service/*.egg-info/
+/ai-service/dist/
+/ai-service/build/
+/ai-service/.env
+
+###杂项
+*.docx
