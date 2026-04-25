@@ -39,3 +39,6 @@ build/
 /web/node_modules
 
 /.github/agents/
+
+### redis
+dump.rdb
