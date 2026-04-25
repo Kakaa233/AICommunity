@@ -23,7 +23,9 @@ router = APIRouter(prefix="/moderation", tags=["moderation"])
 async def moderation(body: ModerationRequest):
     start = time.monotonic()
     service = ModerationService()
-    data, fallback = await service.run(title=body.title, content=body.content)
+    title = body.title or ""
+    content = body.content or ""
+    data, fallback = await service.run(title=title, content=content)
     elapsed_ms = round((time.monotonic() - start) * 1000)
     return ApiResponse(
         code=0 if data else 5002,

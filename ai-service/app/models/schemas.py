@@ -43,11 +43,14 @@ class ApiResponse(BaseModel, Generic[T]):
 
 
 class PolishRequest(BaseModel):
-    title: str = Field(..., max_length=200, description="Article title")
-    content: str = Field(..., max_length=50000, description="Article body markdown")
+    title: str = Field("", max_length=200, description="Article title")
+    content: str = Field("", max_length=50000, description="Article body markdown")
+    text: str = Field("", max_length=50000, description="Legacy plain text field from Java gateway")
 
 
 class PolishResponse(BaseModel):
+    polishedText: str = ""
+    changes: str = ""
     polishedTitle: str = ""
     summary: str = ""
     tags: list[str] = []
@@ -55,7 +58,8 @@ class PolishResponse(BaseModel):
 
 class DraftRequest(BaseModel):
     title: str = Field(..., max_length=200, description="Question title")
-    description: str = Field(..., max_length=10000, description="Question description")
+    description: str = Field("", max_length=10000, description="Question description")
+    keywords: str = Field("", max_length=10000, description="Legacy keywords field from Java gateway")
 
 
 class DraftResponse(BaseModel):
@@ -72,8 +76,8 @@ class SummaryResponse(BaseModel):
 
 
 class QualityRequest(BaseModel):
-    title: str = Field(..., max_length=200)
-    content: str = Field(..., max_length=50000)
+    title: str = Field("", max_length=200)
+    content: str = Field("", max_length=50000)
 
 
 class QualityDimension(BaseModel):
@@ -83,18 +87,23 @@ class QualityDimension(BaseModel):
 
 
 class QualityResponse(BaseModel):
+    qualityScore: int = 0
+    suggestions: str = ""
     totalScore: float = 0.0
     dimensions: list[QualityDimension] = []
 
 
 class ModerationRequest(BaseModel):
-    contentId: str = Field(..., description="Business primary key")
-    title: str = Field(..., max_length=200)
-    content: str = Field(..., max_length=50000)
+    contentId: str = Field("", description="Business primary key")
+    title: str = Field("", max_length=200)
+    content: str = Field("", max_length=50000)
     authorId: str = Field("", max_length=64)
 
 
 class ModerationResponse(BaseModel):
+    isOk: bool = True
+    violationType: str = ""
+    violationExplanation: str = ""
     suggestion: str = "pass"  # pass / flag / reject
     reason: str = ""
     confidence: float = 1.0

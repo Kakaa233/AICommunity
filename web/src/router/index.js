@@ -3,8 +3,6 @@ import Router from 'vue-router'
 
 Vue.use(Router)
 
-//TODO:整明白这个auth.vue是干啥的
-
 const routes = [
     {
         path: '/',

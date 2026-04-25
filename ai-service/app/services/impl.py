@@ -35,10 +35,21 @@ class PolishService(BaseAIService[PolishResponse]):
 
     def _parse_response(self, raw: str) -> PolishResponse:
         data = json.loads(raw)
+        polished_title = data.get("polishedTitle", "")
+        summary = data.get("summary", "")
+        tags = data.get("tags", [])
+        polished_text = summary
+        if polished_title and summary:
+            polished_text = f"{polished_title}\n\n{summary}"
+        elif polished_title:
+            polished_text = polished_title
+
         return PolishResponse(
-            polishedTitle=data.get("polishedTitle", ""),
-            summary=data.get("summary", ""),
-            tags=data.get("tags", []),
+            polishedText=polished_text,
+            changes="、".join(tags) if isinstance(tags, list) else "",
+            polishedTitle=polished_title,
+            summary=summary,
+            tags=tags,
         )
 
     async def run(self, title: str, content: str) -> tuple[PolishResponse | None, bool]:
@@ -93,8 +104,14 @@ class QualityService(BaseAIService[QualityResponse]):
     def _parse_response(self, raw: str) -> QualityResponse:
         data = json.loads(raw)
         dims = data.get("dimensions", [])
+        total_score = float(data.get("totalScore", 0))
+        suggestion = "；".join(
+            [d.get("reason", "") for d in dims if d.get("reason", "")]
+        )
         return QualityResponse(
-            totalScore=float(data.get("totalScore", 0)),
+            qualityScore=int(round(total_score)),
+            suggestions=suggestion,
+            totalScore=total_score,
             dimensions=[
                 {
                     "name": d.get("name", ""),
@@ -121,11 +138,17 @@ class ModerationService(BaseAIService[ModerationResponse]):
 
     def _parse_response(self, raw: str) -> ModerationResponse:
         data = json.loads(raw)
+        suggestion = data.get("suggestion", "pass")
+        is_ok = suggestion == "pass"
+        violation_types = data.get("violationTypes", [])
         return ModerationResponse(
-            suggestion=data.get("suggestion", "pass"),
+            isOk=is_ok,
+            violationType=violation_types[0] if violation_types else "",
+            violationExplanation=data.get("reason", ""),
+            suggestion=suggestion,
             reason=data.get("reason", ""),
             confidence=float(data.get("confidence", 1.0)),
-            violationTypes=data.get("violationTypes", []),
+            violationTypes=violation_types,
         )
 
     async def run(

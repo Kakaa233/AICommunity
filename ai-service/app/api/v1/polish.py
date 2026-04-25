@@ -23,7 +23,9 @@ router = APIRouter(prefix="/polish", tags=["polish"])
 async def polish(body: PolishRequest):
     start = time.monotonic()
     service = PolishService()
-    data, fallback = await service.run(title=body.title, content=body.content)
+    title = body.title or ""
+    content = body.content or body.text or ""
+    data, fallback = await service.run(title=title, content=content)
     elapsed_ms = round((time.monotonic() - start) * 1000)
     return ApiResponse(
         code=0 if data else 5002,

@@ -102,9 +102,13 @@ public class AiTaskQuartz {
     }
 
     private void handleRecommendTask(AiTask task, Map<String, Object> payload) {
-        String content = (String) payload.get("content");
+        String articleId = (String) payload.getOrDefault("articleId", "");
+        String title = (String) payload.getOrDefault("title", "");
+        String content = (String) payload.getOrDefault("content", "");
         RecommendRequest req = new RecommendRequest();
-        req.setContent(content);
+        req.setArticleId(articleId);
+        req.setCurrentTitle(title);
+        req.setCurrentContent(content);
         AiApiResponse<RecommendResponse> resp = aiGatewayService.callRecommend(req);
         if (!resp.isFallbackHit() && resp.getData() != null) {
             aiTaskService.markSuccess(task.getId(), resp.getData());

@@ -6,6 +6,23 @@
         <i class="el-icon-edit"></i> 写文章
       </div>
       <div class="header-actions">
+        <el-button
+          type="warning"
+          class="ai-btn ai-polish-btn"
+          @click="aiPolish"
+          :loading="polishLoading"
+          icon="el-icon-edit"
+        >
+          AI润色
+        </el-button>
+        <el-button
+          type="success"
+          class="ai-btn ai-draft-btn"
+          @click="aiDraftDialogVisible = true"
+          icon="el-icon-plus"
+        >
+          AI写稿
+        </el-button>
         <el-button 
           type="default" 
           class="cancel-btn"
@@ -123,9 +140,61 @@
             </div>
           </quill-editor>
         </div>
+        <!-- AI 质量分预览 -->
+        <div class="quality-section">
+          <el-button
+            type="info"
+            size="small"
+            class="quality-btn"
+            @click="checkQuality"
+            :loading="qualityLoading"
+            icon="el-icon-data-analysis"
+            plain
+          >
+            {{ qualityScore !== null ? '刷新评分' : 'AI质量评估' }}
+          </el-button>
+          <div v-if="qualityScore !== null" class="quality-result">
+            <span class="quality-badge" :class="qualityScore >= 80 ? 'high' : qualityScore >= 60 ? 'medium' : 'low'">
+              {{ qualityScore }}分
+            </span>
+            <span class="quality-suggestions" v-if="qualitySuggestions">
+              💡 {{ qualitySuggestions }}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+  <!-- AI 写稿对话框 -->
+  <el-dialog
+    title="AI 写稿助手"
+    :visible.sync="aiDraftDialogVisible"
+    width="500px"
+    top="30vh"
+    class="ai-draft-dialog"
+  >
+    <el-form label-width="80px">
+      <el-form-item label="文章标题">
+        <el-input v-model="draftTitle" placeholder="输入文章的标题主题" />
+      </el-form-item>
+      <el-form-item label="关键词">
+        <el-input
+          v-model="draftKeywords"
+          type="textarea"
+          :rows="3"
+          placeholder="可选，用逗号分隔多个关键词"
+        />
+      </el-form-item>
+    </el-form>
+    <span slot="footer">
+      <el-button @click="aiDraftDialogVisible = false">取消</el-button>
+      <el-button
+        type="success"
+        @click="aiDraft"
+        :loading="draftLoading"
+      >开始生成</el-button>
+    </span>
+  </el-dialog>
+</div>
 </template>
 
 <script>
@@ -193,7 +262,19 @@ export default {
       },
       rules: {},
       myCookie: '',
-      articleId: ''
+      articleId: '',
+      // AI 功能
+      polishLoading: false,
+      aiDraftDialogVisible: false,
+      draftTitle: '',
+      draftKeywords: '',
+      draftLoading: false,
+      // AI 质量分
+      qualityScore: null,
+      qualitySuggestions: '',
+      qualityLoading: false,
+      // 发布后 AI 状态
+      publishAiResult: null
     };
   },
   mounted() {
@@ -307,6 +388,11 @@ export default {
                  _self.input = '';
                  _self.content = '';
                 _self.$message.success("发布成功～");
+                // 保存 AI 处理结果，用于发布后反馈
+                if (res.data.data && typeof res.data.data === 'object') {
+                  _self.publishAiResult = res.data.data;
+                  _self.showPublishAiFeedback();
+                }
               }
             }
           })
@@ -317,6 +403,149 @@ export default {
         this.$message.error("发布内容不能为空");
       }
       // console.log("11111");
+    },
+    // ===== AI 辅助功能 =====
+
+    /** AI 润色：将当前内容发送到后端，用返回的润色结果替换编辑器内容 */
+    aiPolish() {
+      if (!this.content) {
+        this.$message.warning('请先输入文章内容');
+        return;
+      }
+      // 提取纯文本
+      var reg = /<\/?.+?\/?>/g;
+      var text = this.content.replace(reg, '');
+      if (text.length < 10) {
+        this.$message.warning('内容太短，至少10个字符才能润色');
+        return;
+      }
+      this.polishLoading = true;
+      this.$axios
+        .post('/apis/article/ai/polish', { text: text }, {
+          headers: { 'Content-Type': 'application/json;charset=utf-8' },
+          withCredentials: true
+        })
+        .then((res) => {
+          if (res.data && res.data.code == 0 && res.data.data) {
+            var polished = res.data.data.polishedText;
+            // 替换编辑器内容（保持富文本格式：用 <p> 包裹）
+            this.content = '<p>' + polished.replace(/\n/g, '</p><p>') + '</p>';
+            this.$message.success('AI润色完成 ✨');
+          } else {
+            this.$message.error(res.data.msg || '润色服务暂不可用');
+          }
+        })
+        .catch((err) => {
+          console.error('AI润色失败', err);
+          this.$message.error('AI润色服务异常，请稍后重试');
+        })
+        .finally(() => {
+          this.polishLoading = false;
+        });
+    },
+
+    /** AI 写稿：发送标题+关键词，生成内容填入编辑器 */
+    aiDraft() {
+      if (!this.draftTitle) {
+        this.$message.warning('请输入文章标题');
+        return;
+      }
+      this.draftLoading = true;
+      this.$axios
+        .post('/apis/article/ai/draft', {
+          title: this.draftTitle,
+          keywords: this.draftKeywords
+        }, {
+          headers: { 'Content-Type': 'application/json;charset=utf-8' },
+          withCredentials: true
+        })
+        .then((res) => {
+          if (res.data && res.data.code == 0 && res.data.data) {
+            var draftContent = res.data.data.draftContent;
+            this.content = '<p>' + draftContent.replace(/\n/g, '</p><p>') + '</p>';
+            this.input = this.draftTitle;
+            this.aiDraftDialogVisible = false;
+            this.draftTitle = '';
+            this.draftKeywords = '';
+            this.$message.success('AI写稿完成 📝');
+          } else {
+            this.$message.error(res.data.msg || '写稿服务暂不可用');
+          }
+        })
+        .catch((err) => {
+          console.error('AI写稿失败', err);
+          this.$message.error('AI写稿服务异常，请稍后重试');
+        })
+        .finally(() => {
+          this.draftLoading = false;
+        });
+    },
+
+    /** AI 质量分预览：发送内容获取质量评分 */
+    checkQuality() {
+      if (!this.content) {
+        this.$message.warning('请先输入文章内容');
+        return;
+      }
+      var reg = /<\/?.+?\/?>/g;
+      var text = this.content.replace(reg, '');
+      if (text.length < 20) {
+        this.$message.warning('内容太短，至少20个字符才能评估');
+        return;
+      }
+      this.qualityLoading = true;
+      this.$axios
+        .post('/apis/article/ai/quality', { content: text }, {
+          headers: { 'Content-Type': 'application/json;charset=utf-8' },
+          withCredentials: true
+        })
+        .then((res) => {
+          if (res.data && res.data.code == 0 && res.data.data) {
+            this.qualityScore = res.data.data.qualityScore;
+            this.qualitySuggestions = res.data.data.suggestions || '';
+            this.$message.success('质量评估完成，评分: ' + this.qualityScore + '分');
+          } else {
+            this.$message.error(res.data.msg || '质量评估暂不可用');
+          }
+        })
+        .catch((err) => {
+          console.error('质量评估失败', err);
+          this.$message.error('质量评估服务异常');
+        })
+        .finally(() => {
+          this.qualityLoading = false;
+        });
+    },
+
+    /** 发布后展示 AI 处理结果反馈 */
+    showPublishAiFeedback() {
+      if (!this.publishAiResult) return;
+      var result = this.publishAiResult;
+      var messages = [];
+      // 质量分
+      if (result.qualityScore) {
+        var score = result.qualityScore;
+        var scoreText = score >= 80 ? '优秀' : score >= 60 ? '良好' : '一般';
+        messages.push('AI评分: ' + score + '分 (' + scoreText + ')');
+      }
+      // 审核状态
+      if (result.reviewStatus) {
+        var statusMap = { pass: '✅ 已通过', flag: '⚠️ 需人工复审', pending: '⏳ 审核中' };
+        messages.push('内容审核: ' + (statusMap[result.reviewStatus] || result.reviewStatus));
+      }
+      // 摘要
+      if (result.summary) {
+        messages.push('AI摘要已生成');
+      }
+      if (messages.length > 0) {
+        this.$notify({
+          title: 'AI 处理报告',
+          message: messages.join('<br>'),
+          duration: 6000,
+          dangerouslyUseHTMLString: true,
+          type: 'success'
+        });
+      }
     },
   },
 };
@@ -506,6 +735,76 @@ export default {
       min-height: 500px;
     }
   }
+}
+
+/* AI 按钮样式 */
+.ai-btn {
+  transition: all 0.3s ease;
+  font-weight: 500;
+  border: none;
+}
+.ai-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.ai-polish-btn {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  color: #fff;
+}
+.ai-draft-btn {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  color: #fff;
+}
+
+/* AI 质量分区域 */
+.quality-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  margin-top: 16px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 8px;
+}
+.quality-btn {
+  flex-shrink: 0;
+}
+.quality-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.quality-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+.quality-badge.high {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+.quality-badge.medium {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+}
+.quality-badge.low {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+.quality-suggestions {
+  font-size: 13px;
+  color: #606266;
+  line-height: 1.5;
+}
+
+/* AI 写稿对话框 */
+.ai-draft-dialog ::v-deep .el-dialog__title {
+  font-weight: 600;
+  color: #27ae60;
 }
 
 /* 响应式设计 */

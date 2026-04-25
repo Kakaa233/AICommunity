@@ -23,7 +23,8 @@ router = APIRouter(prefix="/draft", tags=["draft"])
 async def draft(body: DraftRequest):
     start = time.monotonic()
     service = DraftService()
-    data, fallback = await service.run(title=body.title, description=body.description)
+    description = body.description or body.keywords or ""
+    data, fallback = await service.run(title=body.title, description=description)
     elapsed_ms = round((time.monotonic() - start) * 1000)
     return ApiResponse(
         code=0 if data else 5002,

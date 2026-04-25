@@ -20,6 +20,8 @@ import com.jd.wego.vo.ai.DraftRequest;
 import com.jd.wego.vo.ai.DraftResponse;
 import com.jd.wego.vo.ai.ModerationRequest;
 import com.jd.wego.vo.ai.ModerationResponse;
+import com.jd.wego.vo.ai.QualityRequest;
+import com.jd.wego.vo.ai.QualityResponse;
 import com.jd.wego.vo.ai.RecommendRequest;
 import com.jd.wego.vo.ai.RecommendResponse;
 import com.jd.wego.vo.ai.SummaryResponse;
@@ -78,7 +80,7 @@ public class ArticleController {
 
     @PostMapping("/insert")
     @ResponseBody
-    public Result<Boolean> insertArticle(HttpServletRequest request, @RequestBody Article article) {
+    public Result<Map<String, Object>> insertArticle(HttpServletRequest request, @RequestBody Article article) {
         User user = loginController.getUserInfo(request);
         if (user == null) {
             log.info("用户未登录");
@@ -102,6 +104,7 @@ public class ArticleController {
         articleService.insertArticle(article);
 
         // ===== AI 处理管线（异步非阻塞，失败不影响发布） =====
+        Map<String, Object> aiReportMap = new HashMap<>();
         try {
             AiPublishReport aiReport = aiFacadeService.processArticleBeforePublish(
                     article.getArticleTitle(), article.getArticleContent());
@@ -119,6 +122,7 @@ public class ArticleController {
                 article.setAiSummary(aiSummary);
                 aiFieldsUpdated = true;
                 log.info("AI摘要已生成 articleId={}", article.getArticleId());
+                aiReportMap.put("summary", aiSummary);
             }
 
             // 质量评分写入 ai_quality_score
@@ -127,23 +131,29 @@ public class ArticleController {
                 aiFieldsUpdated = true;
                 log.info("AI质量评分: {}，建议: {}", aiReport.getQuality().getQualityScore(),
                         aiReport.getQuality().getSuggestions());
+                aiReportMap.put("qualityScore", aiReport.getQuality().getQualityScore());
+                aiReportMap.put("suggestions", aiReport.getQuality().getSuggestions());
             }
 
             // 审核结果写入 ai_review_status / ai_review_reason
             if (aiReport.getModeration() != null) {
                 if (aiReport.getModeration().isOk()) {
                     article.setAiReviewStatus("pass");
+                    aiReportMap.put("reviewStatus", "pass");
                 } else {
                     article.setAiReviewStatus("flag");
                     article.setAiReviewReason(aiReport.getModeration().getViolationExplanation());
                     log.warn("AI内容审核警告: 文章 articleId={} 可能存在违规: {}",
                             article.getArticleId(), aiReport.getModeration().getViolationExplanation());
+                    aiReportMap.put("reviewStatus", "flag");
+                    aiReportMap.put("reviewReason", aiReport.getModeration().getViolationExplanation());
                 }
                 aiFieldsUpdated = true;
             } else {
                 // 审核无结果，标记为 pending 等待异步补充
                 article.setAiReviewStatus("pending");
                 aiFieldsUpdated = true;
+                aiReportMap.put("reviewStatus", "pending");
             }
 
             // 话题标签写入 ai_tags_json
@@ -181,7 +191,7 @@ public class ArticleController {
             log.warn("AI处理后处理异常，已忽略: {}", e.getMessage());
         }
 
-        return Result.success(true);
+        return Result.success(aiReportMap);
     }
 
     @GetMapping("/can/edit")
@@ -360,6 +370,28 @@ public class ArticleController {
         } catch (Exception e) {
             log.error("AI moderate error", e);
             return Result.error(new CodeMsg(500, "内容审核服务异常"));
+        }
+    }
+
+    /**
+     * AI 质量评估 — 写文章页预览调用
+     */
+    @PostMapping("/ai/quality")
+    @ResponseBody
+    public Result<QualityResponse> aiQuality(@RequestBody QualityRequest request) {
+        if (request.getContent() == null || request.getContent().isEmpty()) {
+            return Result.error(new CodeMsg(400, "内容不能为空"));
+        }
+        try {
+            QualityResponse data = aiFacadeService.processArticleOnEdit(request.getContent());
+            if (data != null) {
+                return Result.success(data);
+            } else {
+                return Result.error(new CodeMsg(500, "质量评估服务暂不可用"));
+            }
+        } catch (Exception e) {
+            log.error("AI quality error", e);
+            return Result.error(new CodeMsg(500, "质量评估服务异常"));
         }
     }
 

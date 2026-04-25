@@ -23,7 +23,9 @@ router = APIRouter(prefix="/quality", tags=["quality"])
 async def quality(body: QualityRequest):
     start = time.monotonic()
     service = QualityService()
-    data, fallback = await service.run(title=body.title, content=body.content)
+    title = body.title or "文章质量评估"
+    content = body.content or ""
+    data, fallback = await service.run(title=title, content=content)
     elapsed_ms = round((time.monotonic() - start) * 1000)
     return ApiResponse(
         code=0 if data else 5002,
