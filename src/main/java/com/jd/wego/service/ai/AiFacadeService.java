@@ -50,7 +50,8 @@ public class AiFacadeService {
             int current;
             do {
                 current = consecutiveFailures.get();
-                if (current <= 0) return;
+                if (current <= 0)
+                    return;
             } while (!consecutiveFailures.compareAndSet(current, Math.max(0, current - 1)));
         } else {
             consecutiveFailures.incrementAndGet();
@@ -134,7 +135,8 @@ public class AiFacadeService {
 
     public QualityResponse processArticleOnEdit(String content) {
         log.info("AiFacade: processing article on edit, contentLen={}", content.length());
-        if (isCircuitBroken()) return null;
+        if (isCircuitBroken())
+            return null;
         try {
             QualityRequest qReq = new QualityRequest();
             qReq.setContent(content);
@@ -161,16 +163,46 @@ public class AiFacadeService {
         return resp;
     }
 
+    // public AiApiResponse<DraftResponse> draft(String title, String keywords) {
+    // if (isCircuitBroken()) {
+    // return aiGatewayService.callAiService("/api/v1/draft", new DraftRequest(),
+    // DraftResponse.class);
+    // }
+    // DraftRequest req = new DraftRequest();
+    // req.setTitle(title);
+    // req.setKeywords(keywords);
+    // AiApiResponse<DraftResponse> resp = aiGatewayService.callDraft(req);
+    // recordCallResult(!resp.isFallbackHit());
+    // return resp;
+    // }
+
     public AiApiResponse<DraftResponse> draft(String title, String keywords) {
         if (isCircuitBroken()) {
-            return aiGatewayService.callAiService("/api/v1/draft", new DraftRequest(), DraftResponse.class);
+            log.warn("AiFacade: draft skipped because circuit breaker is OPEN");
+            return buildDraftFallback("AI service circuit breaker is open");
         }
+        if (title == null || title.trim().isEmpty()) {
+            log.warn("AiFacade: draft request has empty title, return fallback");
+            return buildDraftFallback("title is required");
+        }
+
         DraftRequest req = new DraftRequest();
         req.setTitle(title);
         req.setKeywords(keywords);
         AiApiResponse<DraftResponse> resp = aiGatewayService.callDraft(req);
         recordCallResult(!resp.isFallbackHit());
         return resp;
+    }
+
+    private AiApiResponse<DraftResponse> buildDraftFallback(String message) {
+        AiApiResponse<DraftResponse> fallback = new AiApiResponse<>();
+        fallback.setCode(5002);
+        fallback.setMessage(message);
+        fallback.setData(null);
+        fallback.setLatencyMs(0);
+        fallback.setFallbackHit(true);
+        fallback.setModel("circuit-open");
+        return fallback;
     }
 
     public AiApiResponse<ModerationResponse> moderate(String content) {
