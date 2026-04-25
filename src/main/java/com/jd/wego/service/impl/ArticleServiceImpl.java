@@ -147,6 +147,11 @@ public class ArticleServiceImpl implements ArticleService {
         return dealWithArticleVo(articleList);
     }
 
+    @Override
+    public List<Article> selectByReviewStatus(List<String> statuses) {
+        return articleDao.selectByReviewStatus(statuses);
+    }
+
     public List<ArticleUserVo> dealWithArticleVo(List<Article> articleList) {
         List<ArticleUserVo> articleUserVos = new ArrayList<>();
         for (Article article : articleList) {

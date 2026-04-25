@@ -15,12 +15,14 @@ public interface ArticleDao {
 
     String FILED_VALUE = "article_title, article_summary, article_content, article_view_count, " +
             "            article_like_count, article_comment_count, created_time, update_time, is_deleted," +
-            "            article_category_id, article_category_name, article_user_id";
+            "            article_category_id, article_category_name, article_user_id, " +
+            "            ai_summary, ai_quality_score, ai_review_status, ai_review_reason, ai_tags_json, ai_enabled";
     String SELECT_VALUE = " article_id, " + FILED_VALUE;
 
     String NOT_LIKE_COUNT_SELECT_VALUE = "article_title, article_summary, article_content, article_view_count, " +
             "      article_comment_count, created_time, update_time, is_deleted, " +
-            "      article_category_id, article_category_name, article_user_id";
+            "      article_category_id, article_category_name, article_user_id, " +
+            "      ai_summary, ai_quality_score, ai_review_status, ai_review_reason, ai_tags_json, ai_enabled";
 
     /**
      * 插入数据
@@ -29,9 +31,12 @@ public interface ArticleDao {
      */
     @Insert("insert into article(article_title, article_summary, article_content, article_view_count, " +
             "article_like_count, article_comment_count, created_time, update_time, is_deleted, article_category_id, " +
-            "article_category_name, article_user_id) values(#{articleTitle}," +
-            "#{articleSummary}, #{articleContent}, #{articleViewCount}, #{articleLikeCount}, #{articleCommentCount}," +
-            "#{createdTime}, #{updateTime}, #{isDeleted}, #{articleCategoryId}, #{articleCategoryName}, #{articleUserId})")
+            "article_category_name, article_user_id, " +
+            "ai_summary, ai_quality_score, ai_review_status, ai_review_reason, ai_tags_json, ai_enabled) " +
+            "values(#{articleTitle}, #{articleSummary}, #{articleContent}, #{articleViewCount}, " +
+            "#{articleLikeCount}, #{articleCommentCount}, #{createdTime}, #{updateTime}, #{isDeleted}, " +
+            "#{articleCategoryId}, #{articleCategoryName}, #{articleUserId}, " +
+            "#{aiSummary}, #{aiQualityScore}, #{aiReviewStatus}, #{aiReviewReason}, #{aiTagsJson}, #{aiEnabled})")
     void insertArticle(Article article);
 
     /**
@@ -51,7 +56,13 @@ public interface ArticleDao {
             "<if test ='createdTime != null'>created_time = #{createdTime},</if>" +
             "<if test ='updateTime != null'>update_time = #{updateTime},</if>" +
             "<if test ='isDeleted != null'>is_deleted = #{isDeleted},</if>" +
-            "<if test ='articleCategoryName != null'>article_category_name = #{articleCategoryName}</if>" +
+            "<if test ='articleCategoryName != null'>article_category_name = #{articleCategoryName},</if>" +
+            "<if test ='aiSummary != null'>ai_summary = #{aiSummary},</if>" +
+            "<if test ='aiQualityScore != null'>ai_quality_score = #{aiQualityScore},</if>" +
+            "<if test ='aiReviewStatus != null'>ai_review_status = #{aiReviewStatus},</if>" +
+            "<if test ='aiReviewReason != null'>ai_review_reason = #{aiReviewReason},</if>" +
+            "<if test ='aiTagsJson != null'>ai_tags_json = #{aiTagsJson},</if>" +
+            "<if test ='aiEnabled != null'>ai_enabled = #{aiEnabled}</if>" +
             "</set>" +
             "where article_id = #{articleId}" +
             "</script>")
@@ -147,5 +158,16 @@ public interface ArticleDao {
     @Select("select " + NOT_LIKE_COUNT_SELECT_VALUE + " , user.* from article inner join user where article_user_id = user_id " +
             "and article_id = #{articleId} and article.is_deleted = 0")
     ArticleUserVo selectAllArticleDetail(int articleId);
+
+    @Select("select article_id, article_title, ai_summary from article where is_deleted = 0 " +
+            "and update_time >= #{since} order by article_view_count desc limit 100")
+    List<Article> selectRecentArticlesForTopic(java.util.Date since);
+
+    @Select("<script>" +
+            "select " + SELECT_VALUE + " from article where is_deleted = 0 " +
+            "and ai_review_status in " +
+            "<foreach collection='statuses' item='s' open='(' separator=',' close=')'>#{s}</foreach> " +
+            "order by update_time desc</script>")
+    List<Article> selectByReviewStatus(@Param("statuses") List<String> statuses);
 
 }

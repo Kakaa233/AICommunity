@@ -263,3 +263,66 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2021-06-20 21:40:34
+
+-- ============================================================
+-- Phase 3: AI 辅助模块数据模型
+-- ============================================================
+
+-- 1. article 表新增 AI 字段
+ALTER TABLE `article`
+    ADD COLUMN `ai_summary` VARCHAR(255) DEFAULT NULL COMMENT 'AI 自动生成的摘要',
+    ADD COLUMN `ai_quality_score` INT(3) DEFAULT NULL COMMENT 'AI 质量评分(0-100)',
+    ADD COLUMN `ai_review_status` VARCHAR(10) DEFAULT 'pending' COMMENT 'AI 审核状态:pass/flag/reject/pending',
+    ADD COLUMN `ai_review_reason` VARCHAR(255) DEFAULT NULL COMMENT 'AI 审核原因/违规说明',
+    ADD COLUMN `ai_tags_json` VARCHAR(255) DEFAULT NULL COMMENT 'AI 话题标签(JSON)',
+    ADD COLUMN `ai_enabled` TINYINT(1) DEFAULT 1 COMMENT '允许 AI 辅助(0=禁用,1=启用)';
+
+-- 2. 新建 ai_task 表
+DROP TABLE IF EXISTS `ai_task`;
+CREATE TABLE `ai_task` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `task_type` VARCHAR(20) NOT NULL COMMENT '任务类型:moderation/topic/recommend/summary',
+    `biz_id` VARCHAR(50) NOT NULL COMMENT '业务主键(如article_id)',
+    `status` VARCHAR(10) NOT NULL DEFAULT 'pending' COMMENT '状态:pending/running/success/failed/dead',
+    `retry_count` INT(3) NOT NULL DEFAULT 0 COMMENT '已重试次数',
+    `max_retries` INT(3) NOT NULL DEFAULT 3 COMMENT '最大重试次数',
+    `payload` TEXT COMMENT '请求参数(JSON)',
+    `result` TEXT COMMENT '执行结果(JSON)',
+    `error_msg` VARCHAR(500) DEFAULT NULL COMMENT '错误信息',
+    `next_run_at` DATETIME DEFAULT NULL COMMENT '下次执行时间',
+    `created_at` DATETIME NOT NULL COMMENT '创建时间',
+    `updated_at` DATETIME NOT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_task_type_status` (`task_type`, `status`),
+    KEY `idx_biz_id` (`task_type`, `biz_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='AI 异步任务表';
+
+-- ============================================================
+-- Phase 4: 话题聚合及推荐
+-- ============================================================
+
+-- 1. ai_topic 话题表
+DROP TABLE IF EXISTS `ai_topic`;
+CREATE TABLE `ai_topic` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `title` VARCHAR(100) NOT NULL COMMENT '话题标题',
+    `summary` VARCHAR(500) DEFAULT NULL COMMENT '话题摘要',
+    `score` DOUBLE DEFAULT NULL COMMENT '话题热度分',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_score` (`score`),
+    KEY `idx_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='AI 话题聚合表';
+
+-- 2. ai_topic_item 话题-文章关联表
+DROP TABLE IF EXISTS `ai_topic_item`;
+CREATE TABLE `ai_topic_item` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `topic_id` INT(11) NOT NULL COMMENT '话题ID',
+    `article_id` INT(11) NOT NULL COMMENT '文章ID',
+    `score` DOUBLE DEFAULT NULL COMMENT '相关性分',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_topic_id` (`topic_id`),
+    KEY `idx_article_id` (`article_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='AI 话题-文章关联表';

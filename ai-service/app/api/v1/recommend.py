@@ -6,6 +6,7 @@ Output: list of recommended articles with reason
 
 from __future__ import annotations
 
+import json
 import time
 
 import structlog
@@ -23,10 +24,14 @@ router = APIRouter(prefix="/recommend", tags=["recommend"])
 async def recommend(body: RecommendRequest):
     start = time.monotonic()
     service = RecommendService()
-    # Java backend should send the current article and candidates.
-    # Placeholder — real integration will populate these from the request body.
-    current_article = f"articleId: {body.articleId}"
-    candidates_json = "[]"
+    # Build current article description with title + first 500 chars of content
+    current_parts = [f"articleId: {body.articleId}"]
+    if body.currentTitle:
+        current_parts.append(f"title: {body.currentTitle}")
+    if body.currentContent:
+        current_parts.append(f"content: {body.currentContent[:500]}")
+    current_article = "\n".join(current_parts)
+    candidates_json = json.dumps(body.candidates, ensure_ascii=False) if body.candidates else "[]"
     data, fallback = await service.run(
         current_article=current_article,
         candidates_json=candidates_json,

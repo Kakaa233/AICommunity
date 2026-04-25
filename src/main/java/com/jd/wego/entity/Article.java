@@ -70,6 +70,29 @@ public class Article {
     @Field(type = FieldType.Text, name = "article_user_id")
     private String articleUserId;
 
+    // ==================== AI 辅助字段 ====================
 
+    /** AI 自动生成的摘要 */
+    @Field(type = FieldType.Text, name = "ai_summary")
+    private String aiSummary;
 
+    /** AI 质量评分（0-100） */
+    @Field(type = FieldType.Integer, name = "ai_quality_score")
+    private Integer aiQualityScore;
+
+    /** AI 审核状态：pass / flag / reject / pending */
+    @Field(type = FieldType.Text, name = "ai_review_status")
+    private String aiReviewStatus;
+
+    /** AI 审核原因/违规说明 */
+    @Field(type = FieldType.Text, name = "ai_review_reason")
+    private String aiReviewReason;
+
+    /** AI 提取的话题标签（JSON 数组） */
+    @Field(type = FieldType.Text, name = "ai_tags_json")
+    private String aiTagsJson;
+
+    /** 是否允许 AI 辅助 */
+    @Field(type = FieldType.Integer, name = "ai_enabled")
+    private Boolean aiEnabled;
 }

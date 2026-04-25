@@ -38,9 +38,34 @@
               <i class="el-icon-view"></i>
               <span>{{ listData.articleViewCount }}</span>
             </div>
+            <el-badge v-if="qualityBadge" :type="qualityBadge.type" class="quality-badge-wrapper">
+              <span class="quality-badge-text">{{ qualityBadge.text }}</span>
+            </el-badge>
           </div>
         </div>
-        
+
+        <!-- AI 摘要卡片 -->
+        <div v-if="listData.aiSummary" class="ai-summary-card">
+          <div class="ai-summary-header">
+            <i class="el-icon-reading"></i>
+            <span class="ai-summary-label">AI 摘要</span>
+          </div>
+          <p class="ai-summary-text">{{ listData.aiSummary }}</p>
+        </div>
+
+        <!-- AI 标签 -->
+        <div v-if="aiTags.length > 0" class="ai-tags-row">
+          <span class="ai-tag-label">话题标签</span>
+          <el-tag
+            v-for="(tag, idx) in aiTags"
+            :key="idx"
+            size="small"
+            type="success"
+            effect="plain"
+            class="ai-tag"
+          >{{ tag }}</el-tag>
+        </div>
+
         <!-- 文章内容 -->
         <div class="article-content">
           {{ listData.articleContent }}
@@ -77,6 +102,22 @@
                 <p class="hot-title">{{ item.articleTitle }}</p>
                 <p class="hot-stats">{{ item.articleViewCount }}次浏览</p>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 相关推荐 -->
+        <div v-if="recommendData.length > 0" class="sidebar-section recommend-section">
+          <div class="section-title">相关推荐</div>
+          <div class="recommend-list">
+            <div
+              class="recommend-item"
+              v-for="(item, index) in recommendData"
+              :key="index"
+              @click="goHot(item.articleId)"
+            >
+              <div class="recommend-title">{{ item.title }}</div>
+              <div class="recommend-reason">{{ item.reason }}</div>
             </div>
           </div>
         </div>
@@ -132,7 +173,26 @@ export default {
       dialogFormVisible: false,
       textarea: '',
       commentList: [],
+      recommendData: [],
     };
+  },
+  computed: {
+    aiTags() {
+      if (!this.listData.aiTagsJson) return [];
+      try {
+        const parsed = JSON.parse(this.listData.aiTagsJson);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    },
+    qualityBadge() {
+      const score = this.listData.aiQualityScore;
+      if (score == null) return null;
+      if (score >= 80) return { type: 'success', text: `质量 ${score}` };
+      if (score >= 60) return { type: 'warning', text: `质量 ${score}` };
+      return { type: 'danger', text: `质量 ${score}` };
+    },
   },
   mounted() {
     this.getData();
@@ -306,6 +366,8 @@ export default {
             if (res.data.code == 0) {
               let da = res.data.data;
               _self.listData = da;
+              // 文章加载完成后再拉取推荐
+              _self.getRecommend();
             }
           }
         })
@@ -367,6 +429,25 @@ export default {
         })
         .catch((err) => {
           console.log(err);
+        });
+    },
+    getRecommend() {
+      var _self = this;
+      var articleId = parseInt(_self.artId);
+      if (!articleId) return;
+      var url = "/apis/article/ai/recommend";
+      _self.$axios
+        .get(url, { params: { articleId: articleId } })
+        .then((res) => {
+          if (res.status == 200 && res.data && res.data.code == 0) {
+            let data = res.data.data;
+            if (data && data.items && Array.isArray(data.items)) {
+              _self.recommendData = data.items;
+            }
+          }
+        })
+        .catch((err) => {
+          console.log("推荐加载失败", err);
         });
     },
   },
@@ -506,6 +587,59 @@ export default {
         word-break: break-word;
       }
       
+      // AI 摘要卡片
+      .ai-summary-card {
+        background: linear-gradient(135deg, #f0f9ff, #e6f7ff);
+        border: 1px solid #bae7ff;
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+        
+        .ai-summary-header {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-bottom: 8px;
+          
+          i {
+            font-size: 16px;
+            color: #1890ff;
+          }
+          
+          .ai-summary-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1890ff;
+          }
+        }
+        
+        .ai-summary-text {
+          margin: 0;
+          font-size: 15px;
+          line-height: 1.6;
+          color: #606266;
+        }
+      }
+      
+      // AI 话题标签
+      .ai-tags-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        
+        .ai-tag-label {
+          font-size: 13px;
+          color: #909399;
+          white-space: nowrap;
+        }
+        
+        .ai-tag {
+          border-radius: 4px;
+        }
+      }
+      
       // 互动按钮
       .interaction-buttons {
         display: flex;
@@ -628,6 +762,49 @@ export default {
           }
         }
       }
+
+      // 相关推荐
+      .recommend-section {
+        margin-top: 20px;
+
+        .recommend-list {
+          padding: 12px 0;
+
+          .recommend-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border-bottom: 1px solid #f5f5f5;
+
+            &:last-child {
+              border-bottom: none;
+            }
+
+            &:hover {
+              background: #f7f8f9;
+            }
+
+            .recommend-title {
+              font-size: 14px;
+              color: #303133;
+              line-height: 1.4;
+              margin-bottom: 4px;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+
+            .recommend-reason {
+              font-size: 12px;
+              color: #909399;
+              line-height: 1.4;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+          }
+        }
+      }
     }
   }
   
@@ -690,6 +867,39 @@ export default {
         font-size: 14px;
       }
     }
+  }
+}
+
+// AI 质量评分徽章
+.quality-badge-wrapper {
+  margin-left: 12px;
+  
+  .quality-badge-text {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #e6f7ff;
+    color: #1890ff;
+    border: 1px solid #91d5ff;
+  }
+  
+  &.el-badge--success .quality-badge-text {
+    background: #f0fff0;
+    color: #52c41a;
+    border-color: #b7eb8f;
+  }
+  
+  &.el-badge--warning .quality-badge-text {
+    background: #fffbe6;
+    color: #faad14;
+    border-color: #ffe58f;
+  }
+  
+  &.el-badge--danger .quality-badge-text {
+    background: #fff2f0;
+    color: #ff4d4f;
+    border-color: #ffccc7;
   }
 }
 

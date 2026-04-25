@@ -7,9 +7,23 @@ import com.jd.wego.redis.JedisService;
 import com.jd.wego.service.ArticleService;
 import com.jd.wego.service.CategoryService;
 import com.jd.wego.service.UserService;
+import com.jd.wego.service.ai.AiFacadeService;
+import com.jd.wego.service.ai.AiGatewayService;
+import com.jd.wego.service.ai.AiTaskService;
 import com.jd.wego.utils.CodeMsg;
 import com.jd.wego.utils.Result;
 import com.jd.wego.vo.ArticleUserVo;
+import com.jd.wego.vo.ai.AiPublishReport;
+import com.jd.wego.vo.ai.PolishRequest;
+import com.jd.wego.vo.ai.PolishResponse;
+import com.jd.wego.vo.ai.DraftRequest;
+import com.jd.wego.vo.ai.DraftResponse;
+import com.jd.wego.vo.ai.ModerationRequest;
+import com.jd.wego.vo.ai.ModerationResponse;
+import com.jd.wego.vo.ai.RecommendRequest;
+import com.jd.wego.vo.ai.RecommendResponse;
+import com.jd.wego.vo.ai.SummaryResponse;
+import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +32,7 @@ import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -50,6 +65,15 @@ public class ArticleController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    AiFacadeService aiFacadeService;
+
+    @Autowired
+    AiGatewayService aiGatewayService;
+
+    @Autowired
+    AiTaskService aiTaskService;
+
     private static final Logger log = LoggerFactory.getLogger(ArticleController.class);
 
     @PostMapping("/insert")
@@ -76,6 +100,86 @@ public class ArticleController {
         publishUser.setAchieveValue(publishUser.getAchieveValue() + 10);
         userService.updateByUserId(publishUser);
         articleService.insertArticle(article);
+
+        // ===== AI 处理管线（异步非阻塞，失败不影响发布） =====
+        try {
+            AiPublishReport aiReport = aiFacadeService.processArticleBeforePublish(
+                    article.getArticleTitle(), article.getArticleContent());
+
+            // 收集需要更新的 AI 字段
+            boolean aiFieldsUpdated = false;
+
+            // 如果有自动摘要，写入 ai_summary
+            if (aiReport.getSummary() != null && aiReport.getSummary().getSummary() != null
+                    && !aiReport.getSummary().getSummary().isEmpty()) {
+                String aiSummary = aiReport.getSummary().getSummary();
+                if (aiSummary.length() > 200) {
+                    aiSummary = aiSummary.substring(0, 200);
+                }
+                article.setAiSummary(aiSummary);
+                aiFieldsUpdated = true;
+                log.info("AI摘要已生成 articleId={}", article.getArticleId());
+            }
+
+            // 质量评分写入 ai_quality_score
+            if (aiReport.getQuality() != null) {
+                article.setAiQualityScore(aiReport.getQuality().getQualityScore());
+                aiFieldsUpdated = true;
+                log.info("AI质量评分: {}，建议: {}", aiReport.getQuality().getQualityScore(),
+                        aiReport.getQuality().getSuggestions());
+            }
+
+            // 审核结果写入 ai_review_status / ai_review_reason
+            if (aiReport.getModeration() != null) {
+                if (aiReport.getModeration().isOk()) {
+                    article.setAiReviewStatus("pass");
+                } else {
+                    article.setAiReviewStatus("flag");
+                    article.setAiReviewReason(aiReport.getModeration().getViolationExplanation());
+                    log.warn("AI内容审核警告: 文章 articleId={} 可能存在违规: {}",
+                            article.getArticleId(), aiReport.getModeration().getViolationExplanation());
+                }
+                aiFieldsUpdated = true;
+            } else {
+                // 审核无结果，标记为 pending 等待异步补充
+                article.setAiReviewStatus("pending");
+                aiFieldsUpdated = true;
+            }
+
+            // 话题标签写入 ai_tags_json
+            if (aiReport.getTopics() != null && aiReport.getTopics().getTopics() != null
+                    && !aiReport.getTopics().getTopics().isEmpty()) {
+                article.setAiTagsJson(JSON.toJSONString(aiReport.getTopics().getTopics()));
+                aiFieldsUpdated = true;
+            }
+
+            // 如果有 AI 字段更新，同步到数据库
+            if (aiFieldsUpdated) {
+                article.setUpdateTime(new Date());
+                articleService.updateArticle(article);
+                log.info("AI处理结果已落库 articleId={}", article.getArticleId());
+            }
+
+            // ===== 创建异步任务（补全未完成的 AI 处理） =====
+            // 如果没有摘要，创建异步摘要任务
+            if (aiReport.getSummary() == null || aiReport.getSummary().getSummary() == null) {
+                Map<String, Object> summaryPayload = new HashMap<>();
+                summaryPayload.put("content", article.getArticleContent());
+                summaryPayload.put("articleId", String.valueOf(article.getArticleId()));
+                aiTaskService.createTask("summary", String.valueOf(article.getArticleId()), summaryPayload);
+            }
+
+            // 如果没有审核结果，创建异步审核任务
+            if (aiReport.getModeration() == null) {
+                Map<String, Object> modPayload = new HashMap<>();
+                modPayload.put("content", article.getArticleTitle() + "\n" + article.getArticleContent());
+                modPayload.put("articleId", String.valueOf(article.getArticleId()));
+                aiTaskService.createTask("moderation", String.valueOf(article.getArticleId()), modPayload);
+            }
+        } catch (Exception e) {
+            // AI 任何异常都不影响主流程
+            log.warn("AI处理后处理异常，已忽略: {}", e.getMessage());
+        }
 
         return Result.success(true);
     }
@@ -188,6 +292,147 @@ public class ArticleController {
         }
         */
         return Result.success(articleUserVoList);
+    }
+
+    // ==================== AI 辅助接口 ====================
+
+    /**
+     * AI 润色文章
+     */
+    @PostMapping("/ai/polish")
+    @ResponseBody
+    public Result<PolishResponse> aiPolish(@RequestBody PolishRequest request) {
+        if (request.getText() == null || request.getText().isEmpty()) {
+            return Result.error(new CodeMsg(400, "文本不能为空"));
+        }
+        try {
+            com.jd.wego.vo.ai.AiApiResponse<PolishResponse> resp = aiFacadeService.polish(request.getText());
+            if (resp.getData() != null) {
+                return Result.success(resp.getData());
+            } else {
+                return Result.error(new CodeMsg(500, "AI润色服务暂不可用，请稍后重试"));
+            }
+        } catch (Exception e) {
+            log.error("AI polish error", e);
+            return Result.error(new CodeMsg(500, "AI润色服务异常"));
+        }
+    }
+
+    /**
+     * AI 写稿
+     */
+    @PostMapping("/ai/draft")
+    @ResponseBody
+    public Result<DraftResponse> aiDraft(@RequestBody DraftRequest request) {
+        if (request.getTitle() == null || request.getTitle().isEmpty()) {
+            return Result.error(new CodeMsg(400, "标题不能为空"));
+        }
+        try {
+            com.jd.wego.vo.ai.AiApiResponse<DraftResponse> resp = aiFacadeService.draft(
+                    request.getTitle(), request.getKeywords());
+            if (resp.getData() != null) {
+                return Result.success(resp.getData());
+            } else {
+                return Result.error(new CodeMsg(500, "AI写稿服务暂不可用，请稍后重试"));
+            }
+        } catch (Exception e) {
+            log.error("AI draft error", e);
+            return Result.error(new CodeMsg(500, "AI写稿服务异常"));
+        }
+    }
+
+    /**
+     * 内容审核
+     */
+    @PostMapping("/ai/moderate")
+    @ResponseBody
+    public Result<ModerationResponse> aiModerate(@RequestBody ModerationRequest request) {
+        if (request.getContent() == null || request.getContent().isEmpty()) {
+            return Result.error(new CodeMsg(400, "内容不能为空"));
+        }
+        try {
+            com.jd.wego.vo.ai.AiApiResponse<ModerationResponse> resp = aiFacadeService.moderate(request.getContent());
+            if (resp.getData() != null) {
+                return Result.success(resp.getData());
+            } else {
+                return Result.error(new CodeMsg(500, "内容审核服务暂不可用"));
+            }
+        } catch (Exception e) {
+            log.error("AI moderate error", e);
+            return Result.error(new CodeMsg(500, "内容审核服务异常"));
+        }
+    }
+
+    /**
+     * 智能推荐 —— 根据文章 ID 获取相关推荐（详情页调用）
+     * GET /article/ai/recommend?articleId=123
+     */
+    @GetMapping("/ai/recommend")
+    @ResponseBody
+    public Result<RecommendResponse> aiRecommend(@RequestParam int articleId) {
+        try {
+            // 1. 获取当前文章
+            Article article = articleService.selectArticleByArticleId(articleId);
+            if (article == null) {
+                return Result.error(new CodeMsg(400, "文章不存在"));
+            }
+
+            // 2. 构建请求
+            RecommendRequest req = new RecommendRequest();
+            req.setArticleId(String.valueOf(articleId));
+            req.setCurrentTitle(article.getArticleTitle());
+            String content = article.getArticleContent();
+            req.setCurrentContent(content != null && content.length() > 500 ? content.substring(0, 500) : content);
+
+            // 3. 从热点文章选取候选（按浏览量排序，排除当前文章）
+            List<ArticleUserVo> hotArticles = articleService.selectArticleByViewCount();
+            if (hotArticles != null && !hotArticles.isEmpty()) {
+                List<Map<String, Object>> candidates = hotArticles.stream()
+                        .filter(a -> a.getArticleId() != articleId)
+                        .limit(15)
+                        .map(a -> {
+                            Map<String, Object> m = new HashMap<>();
+                            m.put("id", String.valueOf(a.getArticleId()));
+                            m.put("title", a.getArticleTitle());
+                            return m;
+                        })
+                        .collect(Collectors.toList());
+                req.setCandidates(candidates);
+            }
+
+            // 4. 调用 AI 推荐
+            com.jd.wego.vo.ai.AiApiResponse<RecommendResponse> resp = aiGatewayService.callRecommend(req);
+            if (resp.getData() != null) {
+                return Result.success(resp.getData());
+            } else {
+                return Result.error(new CodeMsg(500, "推荐服务暂不可用"));
+            }
+        } catch (Exception e) {
+            log.error("AI recommend error for articleId={}", articleId, e);
+            return Result.error(new CodeMsg(500, "推荐服务异常"));
+        }
+    }
+
+    /**
+     * 查询熔断器状态
+     */
+    @GetMapping("/ai/circuit/status")
+    @ResponseBody
+    public Result<java.util.Map<String, Object>> aiCircuitStatus() {
+        java.util.Map<String, Object> status = new HashMap<>();
+        status.put("consecutiveFailures", aiFacadeService.getConsecutiveFailures());
+        status.put("circuitBreakerOpen", aiFacadeService.getConsecutiveFailures() >= 5);
+        return Result.success(status);
+    }
+
+    /**
+     * 重置熔断器
+     */
+    @PostMapping("/ai/circuit/reset")
+    @ResponseBody
+    public Result<Boolean> aiCircuitReset() {
+        aiFacadeService.resetCircuitBreaker();
+        return Result.success(true);
     }
 
 }

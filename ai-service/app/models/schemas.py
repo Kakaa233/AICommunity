@@ -104,6 +104,7 @@ class ModerationResponse(BaseModel):
 class TopicsRequest(BaseModel):
     timeRangeDays: int = 7
     maxTopics: int = 10
+    articles: list[dict] = Field(default=[], description="Article list: [{id, title, summary}, ...]")
 
 
 class TopicItem(BaseModel):
@@ -121,6 +122,9 @@ class TopicsResponse(BaseModel):
 class RecommendRequest(BaseModel):
     articleId: str = Field(..., description="Current article ID")
     limit: int = 6
+    currentTitle: str = Field("", description="Current article title")
+    currentContent: str = Field("", description="Current article content (first 500 chars)")
+    candidates: list[dict] = Field(default=[], description="Candidate articles: [{id, title}, ...]")
 
 
 class RecommendItem(BaseModel):

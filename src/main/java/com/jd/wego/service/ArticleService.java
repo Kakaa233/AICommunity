@@ -45,5 +45,6 @@ public interface ArticleService {
 
     List<ArticleUserVo> selectArticleByKeywords(String keywords);
 
+    List<Article> selectByReviewStatus(List<String> statuses);
 
 }

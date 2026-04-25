@@ -111,6 +111,11 @@ const routes = [
         name: 'ranking',
         component: () => import('@/views/ranking')
     },
+    {
+        path: '/admin/ai-review',
+        name: 'aiReview',
+        component: () => import('@/views/admin/aiReview')
+    },
 ]
 const router = new Router({
     routes

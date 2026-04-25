@@ -6,6 +6,7 @@ Output: list of topics with article IDs
 
 from __future__ import annotations
 
+import json
 import time
 
 import structlog
@@ -23,10 +24,7 @@ router = APIRouter(prefix="/topics", tags=["topics"])
 async def topics(body: TopicsRequest):
     start = time.monotonic()
     service = TopicsService()
-    # Java backend should pass recent articles as a JSON array in a custom header
-    # or in the request body. Here we use a placeholder — real integration will
-    # send articles via the body.articles field.
-    articles_json = "[]"
+    articles_json = json.dumps(body.articles, ensure_ascii=False) if body.articles else "[]"
     data, fallback = await service.run(articles_json=articles_json)
     elapsed_ms = round((time.monotonic() - start) * 1000)
     return ApiResponse(
