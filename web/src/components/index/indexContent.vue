@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div id="indexContent">
     <div class="content">
       <div class="article-card" v-for="(item, index) in listData" :key="index" @click="cardClick(item, $event)">
@@ -64,7 +64,7 @@
             <textarea name="" id="" cols="30" rows="10"></textarea>
         </div>
         <!-- <div class="right">
-          <h3>在线好友</h3>
+          <h3>鍦ㄧ嚎濂藉弸</h3>
           <li>
 
           </li>
@@ -92,8 +92,8 @@ export default {
       listData: [
         {
           articleId: 1,
-          articleTitle: "2024考研数学复习计划分享，三个月从基础到强化",
-          nickname: "考研达人",
+          articleTitle: "Article Title 1",
+          nickname: "User1",
           createdTime: "2024-04-15 10:30",
           articleCommentCount: 45,
           articleLikeCount: 128,
@@ -103,8 +103,8 @@ export default {
         },
         {
           articleId: 2,
-          articleTitle: "阿里巴巴前端面试经验分享，附面经和答案",
-          nickname: "前端小能手",
+          articleTitle: "Article Title 2",
+          nickname: "User2",
           createdTime: "2024-04-14 15:45",
           articleCommentCount: 67,
           articleLikeCount: 234,
@@ -114,8 +114,8 @@ export default {
         },
         {
           articleId: 3,
-          articleTitle: "大学英语四级备考攻略，一个月轻松过425",
-          nickname: "英语学霸",
+          articleTitle: "Article Title 3",
+          nickname: "User3",
           createdTime: "2024-04-13 09:20",
           articleCommentCount: 32,
           articleLikeCount: 89,
@@ -125,8 +125,8 @@ export default {
         },
         {
           articleId: 4,
-          articleTitle: "寻物启事：丢失苹果AirPods Pro，酬谢200元",
-          nickname: "失主小明",
+          articleTitle: "Article Title 4",
+          nickname: "User4",
           createdTime: "2024-04-12 18:30",
           articleCommentCount: 15,
           articleLikeCount: 23,
@@ -136,8 +136,8 @@ export default {
         },
         {
           articleId: 5,
-          articleTitle: "拼单：星巴克咖啡豆，5人成团享8折",
-          nickname: "咖啡爱好者",
+          articleTitle: "Article Title 5",
+          nickname: "User5",
           createdTime: "2024-04-11 14:20",
           articleCommentCount: 8,
           articleLikeCount: 15,
@@ -147,8 +147,8 @@ export default {
         },
         {
           articleId: 6,
-          articleTitle: "表白墙：感谢图书馆三楼的那个她，每次都帮我占座",
-          nickname: "匿名同学",
+          articleTitle: "Article Title 6",
+          nickname: "User6",
           createdTime: "2024-04-10 20:15",
           articleCommentCount: 56,
           articleLikeCount: 189,
@@ -158,8 +158,8 @@ export default {
         },
         {
           articleId: 7,
-          articleTitle: "生活趣事：今天在食堂遇到了辅导员，他居然在排队买奶茶",
-          nickname: "校园小记者",
+          articleTitle: "Article Title 7",
+          nickname: "User7",
           createdTime: "2024-04-09 11:45",
           articleCommentCount: 28,
           articleLikeCount: 76,
@@ -169,8 +169,8 @@ export default {
         },
         {
           articleId: 8,
-          articleTitle: "竞赛组队：全国大学生数学建模竞赛，寻找队友",
-          nickname: "竞赛队长",
+          articleTitle: "Article Title 8",
+          nickname: "User8",
           createdTime: "2024-04-08 16:30",
           articleCommentCount: 34,
           articleLikeCount: 56,
@@ -191,18 +191,11 @@ export default {
     setInterval(() => {
       this.isRed();
     }, 3000);
-    //console.log('全局红点',this.$red)
+    //console.log('鍏ㄥ眬绾㈢偣',this.$red)
   },
   methods: {
     message(id) {
-      this.dialogVisible = true
       this.chatId = id
-
-      // this.websocket = new WebSocket(`ws://localhost:8081/${id}`);
-      // this.websock.onopen = this.websocketonopen;
-      // this.websock.onerror = this.websocketonerror;
-      // this.websock.onmessage = this.websocketonmessage;
-      // this.websock.onclose = this.websocketclose;
       let _self = this;
       this.$router.push({
         name:'chat',
@@ -213,10 +206,10 @@ export default {
 
     },
     websocketonopen: function () {
-                console.log("WebSocket连接成功");
+                console.log("WebSocket杩炴帴鎴愬姛");
               },
     websocketonerror: function (e) {
-      console.log("WebSocket连接发生错误",e);
+      console.log("WebSocket杩炴帴鍙戠敓閿欒",e);
     },
     websocketonmessage: function (e) {
       var da = JSON.parse(e.data);
@@ -234,7 +227,7 @@ export default {
         .get(url)
         .then((res) => {
           if (res.status == 200) {
-            //console.log("红点问题", res.data);
+            //console.log("绾㈢偣闂", res.data);
             _self.$store.amendType({ type: "isRed", blo: res.data.data });
           }
         })
@@ -251,7 +244,7 @@ export default {
         .get(url)
         .then((res) => {
           if (res.status == 200) {
-            console.log("关注列表", res.data);
+            console.log("鍏虫敞鍒楄〃", res.data);
             let args = res.data.data;
             let list = [];
             args.forEach((item) => {
@@ -338,7 +331,7 @@ export default {
       this.$router.push({ name: "Detail", query: { url: num.articleId } });
     },
     cardClick(item, event) {
-      // 确保点击的不是按钮或其他需要独立处理的元素
+      // 纭繚鐐瑰嚮鐨勪笉鏄寜閽垨鍏朵粬闇€瑕佺嫭绔嬪鐞嗙殑鍏冪礌
       const target = event.target;
       if (!target.closest('.action-btn') && !target.closest('.el-button')) {
         this.goDetail(item);
@@ -532,3 +525,5 @@ export default {
   }
 }
 </style>
+
+

@@ -2,6 +2,8 @@ package com.jd.wego.entity;
 
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * @author hbquan
  * @date 2021/5/20 16:54
@@ -20,6 +22,8 @@ public class Message {
     int hasRead;
 
     String conversationId;
+
+    Date createdTime;
 
 
 }

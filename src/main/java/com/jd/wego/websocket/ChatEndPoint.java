@@ -3,9 +3,11 @@ package com.jd.wego.websocket;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jd.wego.entity.Message;
+import com.jd.wego.service.MessageService;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -15,6 +17,7 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,6 +40,13 @@ public class ChatEndPoint {
 
     private String userId = "";
 
+    private static MessageService messageService;
+
+    @Autowired
+    public void setMessageService(MessageService messageService) {
+        ChatEndPoint.messageService = messageService;
+    }
+
 
     @OnOpen
     public void onOpen(Session session, @PathParam("userId") String userId) {
@@ -48,7 +58,6 @@ public class ChatEndPoint {
             onlineUsers.put(userId, this);
         } else {
             onlineUsers.put(userId, this);
-            onlineUsers.put("18392710807", this);
             logger.info(userId + "成功上线");
             addOnlineCount();
         }
@@ -56,29 +65,48 @@ public class ChatEndPoint {
 
     @OnMessage
     /**
-     * 用户之间一对一消息发送,这个message参数是从哪传递过来的？
+     * 用户之间一对一消息发送
      */
     public void onMessage(String message, Session session) {
         try {
             // 将message字符串进行反序列化
-            System.out.println("message------------" + message);
-            System.out.println(message);
             Message messA = JSONObject.parseObject(message, Message.class);
-            // 这里相当于是上面请求路径上的userId
             String toId = messA.getToId();
             String messageContent = messA.getMessageContent();
             String fromId = messA.getFromId();
             logger.info(fromId + "向" + toId + "发送消息：" + messageContent);
 
-            // 这里应该重新构建一个新的Message对象
-            //Message messB = new Message();
-            System.out.println(fromId);
-            if (!Strings.isBlank(fromId)) {
-                onlineUsers.get(fromId).session.getBasicRemote().sendText(message);
+            // 设置消息属性并持久化到数据库
+            messA.setHasRead(0);
+            messA.setCreatedTime(new Date());
+            // 生成 conversationId
+            String conversationId;
+            if (fromId.compareTo(toId) < 0) {
+                conversationId = fromId + "_" + toId;
+            } else {
+                conversationId = toId + "_" + fromId;
+            }
+            messA.setConversationId(conversationId);
+
+            // 保存到数据库
+            if (messageService != null) {
+                messageService.insertMessage(messA);
+            }
+
+            // 发送消息给接收方（如果在线）
+            ChatEndPoint receiver = onlineUsers.get(toId);
+            if (receiver != null) {
+                receiver.session.getBasicRemote().sendText(JSON.toJSONString(messA));
+            }
+
+            // 发送消息给发送方（确认消息已发送）
+            ChatEndPoint sender = onlineUsers.get(fromId);
+            if (sender != null) {
+                sender.session.getBasicRemote().sendText(JSON.toJSONString(messA));
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("WebSocket消息处理异常", e);
         }
     }
 
