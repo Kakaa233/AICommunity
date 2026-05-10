@@ -3,11 +3,6 @@
     <div class="content">
       <div class="article-card" v-for="(item, index) in listData" :key="index" @click="cardClick(item, $event)">
         <div class="card-header">
-          <el-avatar
-            :size="48"
-            :src="item.avatar"
-            class="user-avatar"
-          ></el-avatar>
           <div class="header-info">
             <h3 class="article-title">{{ item.articleTitle }}</h3>
             <div class="user-meta">
@@ -91,7 +86,6 @@ export default {
   name: "indexContent",
   data() {
     return {
-      circleUrl: require("@/assets/img1.webp"),
       id: "4",
       display: true,
       chatId: 0,
@@ -384,19 +378,8 @@ export default {
 
       .card-header {
         display: flex;
-        align-items: flex-start;
-        gap: 16px;
-        margin-bottom: 16px;
-
-        .user-avatar {
-          flex-shrink: 0;
-          cursor: pointer;
-          transition: transform 0.3s ease;
-
-          &:hover {
-            transform: scale(1.05);
-          }
-        }
+        align-items: center;
+        margin-bottom: 12px;
 
         .header-info {
           flex: 1;
@@ -423,7 +406,8 @@ export default {
           .user-meta {
             display: flex;
             align-items: center;
-            gap: 16px;
+            justify-content: space-between;
+            gap: 12px;
 
             .username {
               font-size: 14px;
@@ -439,6 +423,7 @@ export default {
             .time {
               font-size: 13px;
               color: #909399;
+              flex-shrink: 0;
             }
           }
         }
