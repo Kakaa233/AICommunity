@@ -177,6 +177,7 @@ CREATE TABLE `message` (
   `message_content` varchar(255) DEFAULT NULL COMMENT '消息内容',
   `has_read` tinyint(1) DEFAULT NULL COMMENT '是否已读0表示未读，1表示已读',
   `conversation_id` varchar(255) DEFAULT NULL COMMENT '点对点对话id',
+  `created_time` datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`message_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
